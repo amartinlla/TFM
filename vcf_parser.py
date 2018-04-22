@@ -235,7 +235,7 @@ def read_meta(meta_string):
         return meta_string.lstrip('#'), 'none'
     return match.group('key'), match.group('val')
 
-def read_vcf(filename):
+def read_vcf(filename,f_out):
 
     # initialization
 
@@ -333,25 +333,177 @@ def read_vcf(filename):
         csq = True
   
     # Now begins the data
-    c = 1
+    num_linea = 1
     for line in vcf_file:
 
         record = read_data(line,row_pattern, dic,samples,sample_indexes,formats)
-        print 'linea', c
-        c += 1
+        print 'linea', num_linea
+        num_linea += 1
       
         # Insert data in BBDD
-        var_id = insert_variant(record['chrom'],record['pos'],record['ID'],record['ref'],record['alt'],record['qual'],record['filt'])   
+        #var_id = insert_variant(record['chrom'],record['pos'],record['ID'],record['ref'],record['alt'],record['qual'],record['filt']) 
 
+        f_out.write('INSERT INTO VARIANT(var_id,chrom,pos,id,ref,alt,qual,filter) VALUES (')
+        f_out.write(str(num_linea)) 
+        f_out.write(',')
+        f_out.write(str(record['chrom'])) 
+        f_out.write(',')
+        f_out.write(str(record['pos'])) 
+        f_out.write(",'")
+        f_out.write(str(record['ID'])) 
+        f_out.write("','")
+        f_out.write(record['ref']) 
+        f_out.write("','")
+        f_out.write(record['alt']) 
+        f_out.write("',")
+        f_out.write(str(record['qual'])) 
+        f_out.write(",'")
+        f_out.write(str(record['filt'])) 
+        f_out.write("');\n")
+
+
+        
         if (csq):    
+        
+            lon = len(str(record['info']['CSQ']).split(","))
+            preds = {}
+            mafs = {}
+            #for value in values_raw: # for each group of values with CSQ tag
+            for ind in range(lon): # for each group of values with CSQ tag
+
+                f_out.write('INSERT INTO TRANSCRIPT(fk_var,allele,consequence,impact,symbol,gene,feature_type,feature,biotype) VALUES(')
+
+                f_out.write(str(num_linea))
+                f_out.write(",'")
+                for name, val in itertools.izip(names, str(record['info']['CSQ'][ind]).split("|")):  # for each value  
+              
+                    #print 'insertando...' ,name , val 
+                
+                    # TRANSCRIPTS
+                    
+                    if name == "Consequence annotations from Ensembl VEP. Format: Allele":                    
+                        f_out.write(val)
+                        f_out.write("','")            
+                    elif name == "Consequence":
+                        f_out.write(val)
+                        f_out.write("','")
+                    elif name == "IMPACT":
+                        f_out.write(val)
+                        f_out.write("','")                               
+                    elif name == "SYMBOL":
+                        f_out.write(val)
+                        f_out.write("','")                   
+                    elif name == "Gene":
+                        f_out.write(val)
+                        f_out.write("','")                     
+                    elif name == "Feature_type":
+                        f_out.write(val)
+                        f_out.write("','")           
+                    elif name == "Feature":
+                        f_out.write(val)
+                        f_out.write("','")
+                     
+
+                    if name == "BIOTYPE": 
+                        f_out.write(val)
+                        f_out.write("');\n")
+                      
+                    # PREDICTORS          
+                    
+
+                    if name == "SIFT":   
+                        preds['sift'] = "'" + val +  "'"                 
+                        #f_out.write(val)
+                        #f_out.write(',')
+                    elif name == "PolyPhen":
+                        preds['poly'] = "'" + val +  "'"  
+                        #f_out.write(val)
+                        #f_out.write(',')
+                    elif name == "LoFtool":
+                        preds['lof'] = "'" + val +  "'"  
+                        #f_out.write(val)
+                        #f_out.write(',')
+                    elif name == "CADD_PHRED":
+                        preds['phred'] = "'" + val +  "'"  
+                        #f_out.write(val)
+                        #f_out.write(',')
+                    elif name == "CADD_RAW":
+                        preds['raw'] = "'" + val +  "'"  
+                        #f_out.write(val)
+                        #f_out.write(',')
+
+                    # POP_MAFS
+                    
+                    if name == "gnomAD_AF":   
+                        mafs['af'] = "'" + val + "'"                
+                        #f_out.write(val)
+                        #f_out.write(',')
+                    elif name == "gnomAD_AFR_AF":
+                        mafs['afr'] =  "'" + val +  "'"
+                        #f_out.write(val)
+                        #f_out.write(',')
+                    elif name == "gnomAD_AMR_AF":
+                        mafs['amr'] = "'" + val +  "'"  
+                        #f_out.write(val)
+                        #f_out.write(',')
+                    elif name == "gnomAD_ASJ_AF":
+                        mafs['asj'] = "'" + val +  "'"  
+                        #f_out.write(val)
+                        #f_out.write(',')
+                    elif name == "gnomAD_EAS_AF":
+                        mafs['eas'] = "'" + val +  "'"
+                    elif name == "gnomAD_FIN_AF":
+                        mafs['fin'] = "'" + val +  "'"
+                    elif name == "gnomAD_NFE_AF":
+                        mafs['nfe'] = "'" + val +  "'"
+                    elif name == "gnomAD_OTH_AF":
+                        mafs['oth'] = "'" + val +  "'"
+                    elif name == "gnomAD_SAS_AF":
+                        mafs['sas'] = "'" + val +  "'"
+
+
+                f_out.write('INSERT INTO PREDICTORS(fk_trans,sift,polyphen,loftool,cadd_phred,cadd_raw) VALUES (')
+                f_out.write(str(ind+1))
+                f_out.write(',')
+                f_out.write(preds['sift'])
+                f_out.write(',')
+                f_out.write(preds['poly'])  
+                f_out.write(',')
+                f_out.write(preds['lof'])  
+                f_out.write(',')
+                f_out.write(preds['phred'])  
+                f_out.write(',')
+                f_out.write(preds['raw'])  
+                f_out.write(');\n')
            
-            values = str(record['info']['CSQ']).split(",")
-     
-            for value in values: # for each group of values with CSQ tag
-                for name,val in itertools.izip(names, value.split("|")):  # for each value   
-                    #print 'insertando...' , name, val 
-                    insert_info(var_id,name,val,'CSQ')
-  
+
+                f_out.write('INSERT INTO POP_MAFS(fk_trans,af,afr_af,amr_af,asj_af,eas_af,fin_af,nfe_af,oth_af,sas_af) VALUES(')
+                f_out.write(str(ind+1))
+                f_out.write(',')
+                f_out.write(mafs['af'])
+                f_out.write(',')
+                f_out.write(mafs['afr'])  
+                f_out.write(',')
+                f_out.write(mafs['amr'])  
+                f_out.write(',')
+                f_out.write(mafs['asj'])  
+                f_out.write(',')
+                f_out.write(mafs['eas'])  
+                f_out.write(',')
+                f_out.write(mafs['fin'])  
+                f_out.write(',')
+                f_out.write(mafs['nfe'])  
+                f_out.write(',')
+                f_out.write(mafs['oth'])  
+                f_out.write(',')
+                f_out.write(mafs['sas'])  
+                f_out.write(');\n')
+
+
+            # VALUES(%s,%s,%s,%s,%s)                  
+                    #f_out.write('INSERT INTO info(fk_var,name,value,groups) VALUES(',var_id,',',name,',',val,',''CSQ'');\n')
+                    
+        sample_id = 0   
         for i in sample_indexes: # for each sample
 
             if str(record['samples'][i]['GT']).find("|") >= 0: #if the genotype is phased for this sample            
@@ -360,11 +512,31 @@ def read_vcf(filename):
                 genotypes = str(record['samples'][i]['GT']).split("/")
 
             #print 'INSERTANDO...'    
-            sample_id = insert_sample(var_id,i,genotypes[0],genotypes[1])
- 
+            #sample_id = insert_sample(var_id,i,genotypes[0],genotypes[1])
+            sample_id = sample_id + 1
+            f_out.write('INSERT INTO SAMPLE(fk_var,name,ale1,ale2) VALUES(')
+            f_out.write(str(num_linea))
+            f_out.write(",'")
+            f_out.write(str(i))
+            f_out.write("','")  
+            f_out.write(genotypes[0])
+            f_out.write("','")  
+            f_out.write(genotypes[1])
+            f_out.write("');\n")
+            
+
             for field in record['samples'][i]: # for each sample
-                if field != 'GT':                                            
-                    insert_gt_fields(sample_id,field,record['samples'][i][field])
+                if field != 'GT':   
+                    #print 'insert GT'                                   
+                    #insert_gt_fields(sample_id,field,record['samples'][i][field])
+                    f_out.write('INSERT INTO GT_FIELDS (fk_sample,name,value) VALUES(')
+                    f_out.write(str(sample_id))
+                    f_out.write(",'")
+                    f_out.write(field)
+                    f_out.write("','")
+                    value = record['samples'][i][field]
+                    f_out.write(str(value))
+                    f_out.write("');\n")
             
 
     return record
@@ -616,84 +788,32 @@ def read_data(line,row_pattern, dic, samples,sample_indexes,formats):
     return record
 
 
-# Write a record to the SQL file
-def write_sql(record):
-    """ write a record to the file """
-    return 0
 
-def connect():
-    """ Connect to the PostgreSQL database server """
-    conn = None
-    try:
-        # read connection parameters
-        params = config()
- 
-        # connect to the PostgreSQL server
-        print('Connecting to the PostgreSQL database...')
-        conn = psycopg2.connect(**params)
- 
-        # create a cursor
-        cur = conn.cursor()
-        
-        # execute a statement
-        print('PostgreSQL database version:')
-        cur.execute('SELECT version()')
- 
-        # display the PostgreSQL database server version
-        db_version = cur.fetchone()
-        print(db_version)
-       
-     # close the communication with the PostgreSQL
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
-            print('Database connection closed.')
 
-def drop_tables():
-    """ drop tables in the PostgreSQL database"""
-    commands = (
-        """
-        DROP TABLE variant CASCADE;                
-        """,
-        """ 
-        DROP TABLE info CASCADE;               
-        """,
-        """
-        DROP TABLE sample CASCADE;
-        """,
-        """
-        DROP TABLE gt_fields CASCADE;            
-        """)
-    conn = None
-    try:
-        # read the connection parameters
-        params = config()
-        # connect to the PostgreSQL server
-        conn = psycopg2.connect(**params)
-        cur = conn.cursor()
-        # create table one by one
-        for command in commands:
-            cur.execute(command)
-        # close communication with the PostgreSQL database server
-        cur.close()
-        # commit the changes
-        conn.commit()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
- 
-def create_tables():
-    """ create tables in the PostgreSQL database"""
-    commands = (
-        """
-        CREATE TABLE variant
+def create_output_file():
+
+    f = open ('out.sql','w')
+    return f
+
+def write_output_file(f,text):
+    f.write(text)
+
+def close_output_file(f):
+    f.close()
+
+def drop_tables(f):
+    f.write("DROP TABLE IF EXISTS VARIANT CASCADE;\n")  
+    f.write("DROP TABLE IF EXISTS TRANSCRIPT CASCADE;\n")  
+    f.write("DROP TABLE IF EXISTS PREDICTORS CASCADE;\n")  
+    f.write("DROP TABLE IF EXISTS POP_MAFS CASCADE;\n")  
+    f.write("DROP TABLE IF EXISTS GT_FIELDS CASCADE;\n") 
+    f.write("DROP TABLE IF EXISTS SAMPLE CASCADE;\n")                
+    
+
+def create_tables(f):
+    f.write("""CREATE TABLE VARIANT
                 (
-                var_id SERIAL,
+                var_id integer NOT NULL,
                 chrom integer NOT NULL,
                 pos integer NOT NULL,
                 id varchar(255),
@@ -702,23 +822,51 @@ def create_tables():
                 qual decimal(20,2),
                 filter varchar(255),
                 PRIMARY KEY (var_id)
-                );
-        """,
-        """ 
-        CREATE TABLE info
+                );\n""")  
+    f.write("""CREATE TABLE TRANSCRIPT
                 (
-                info_id SERIAL,
+                trans_id SERIAL,
                 fk_var integer NOT NULL,
-                name varchar(255),
-                value varchar(2000),
-                groups varchar(30),
-                PRIMARY KEY (info_id),
-                FOREIGN KEY (fk_var) REFERENCES variant (var_id) ON UPDATE CASCADE ON DELETE CASCADE
-                );
-
-        """,
-        """
-        CREATE TABLE sample
+				allele varchar(100),
+				consequence varchar(100),
+				impact varchar(100),
+				symbol varchar(100),
+				gene varchar(100),
+                feature_type varchar(100),
+				feature varchar(100),
+				biotype varchar(100),				
+                PRIMARY KEY (trans_id),
+                FOREIGN KEY (fk_var) REFERENCES VARIANT (var_id) ON UPDATE CASCADE ON DELETE CASCADE
+                );\n""")  
+    f.write("""CREATE TABLE PREDICTORS
+                (
+				pred_id SERIAL,
+                fk_trans integer NOT NULL,
+				sift varchar(100),
+				polyphen varchar(100),
+				loftool varchar(100),
+				cadd_phred varchar(100),
+				cadd_raw varchar(100),				
+                PRIMARY KEY (pred_id),
+                FOREIGN KEY (fk_trans) REFERENCES TRANSCRIPT (trans_id) ON UPDATE CASCADE ON DELETE CASCADE
+                );\n""")  
+    f.write("""CREATE TABLE POP_MAFS
+                (
+				mafs_id SERIAL,
+                fk_trans integer NOT NULL,
+				af varchar(100),
+				afr_af varchar(100),
+				amr_af varchar(100),
+				asj_af varchar(100),
+				eas_af varchar(100),
+				fin_af varchar(100),
+				nfe_af varchar(100),
+				oth_af varchar(100),
+				sas_af varchar(100),
+                PRIMARY KEY (mafs_id),
+                FOREIGN KEY (fk_trans) REFERENCES TRANSCRIPT (trans_id) ON UPDATE CASCADE ON DELETE CASCADE
+                );\n""")  
+    f.write("""CREATE TABLE SAMPLE
                 (
                 sample_id SERIAL,
                 fk_var integer NOT NULL,
@@ -726,165 +874,17 @@ def create_tables():
                 ale1 varchar(255),
                 ale2 varchar(20),
                 PRIMARY KEY (sample_id),
-                FOREIGN KEY (fk_var) REFERENCES variant (var_id) ON UPDATE CASCADE ON DELETE CASCADE
-                );
-        """,
-        """
-        CREATE TABLE gt_fields
+                FOREIGN KEY (fk_var) REFERENCES VARIANT (var_id) ON UPDATE CASCADE ON DELETE CASCADE
+                );\n""")                
+    f.write("""CREATE TABLE GT_FIELDS
                 (
                 gt_fields_id SERIAL,
                 fk_sample integer NOT NULL,
                 name varchar(20) NOT NULL,
                 value varchar(255),
                 PRIMARY KEY (gt_fields_id),
-                FOREIGN KEY (fk_sample) REFERENCES sample (sample_id) ON UPDATE CASCADE ON DELETE CASCADE
-                );
-        """)
-    conn = None
-    try:
-        # read the connection parameters
-        params = config()
-        # connect to the PostgreSQL server
-        conn = psycopg2.connect(**params)
-        cur = conn.cursor()
-        # create table one by one
-        for command in commands:
-            cur.execute(command)
-        # close communication with the PostgreSQL database server
-        cur.close()
-        # commit the changes
-        conn.commit()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
-
-def insert_variant(chrom,pos,id,ref,alt,qual,filter):
-
-    """ insert a new variant into the variant table """
-    # You have to use %s no matter what type you actually have
-    sql = """INSERT INTO variant(chrom,pos,id,ref,alt,qual,filter)
-             VALUES(%s,%s,%s,%s,%s,%s,%s) RETURNING var_id;"""
-    conn = None
-    var_id = None
-    try:
-        # read database configuration
-        params = config()
-        # connect to the PostgreSQL database
-        conn = psycopg2.connect(**params)
-        # create a new cursor
-        cur = conn.cursor()
-        # execute the INSERT statement
-        cur.execute(sql, (chrom,pos,id,ref,alt,qual,filter,))
-        # get the generated id back
-        var_id = cur.fetchone()[0]
-        # commit the changes to the database
-        conn.commit()
-        # close communication with the database
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
- 
-    return var_id
-
-def insert_info(fk_var,name,value,groups):
-
-    """ insert a new info into the info table """
-    sql = """INSERT INTO info(fk_var,name,value,groups)
-             VALUES(%s,%s,%s,%s) RETURNING info_id;"""
-    conn = None
-    info_id = None
-    try:
-        # read database configuration
-        params = config()
-        # connect to the PostgreSQL database
-        conn = psycopg2.connect(**params)
-        # create a new cursor
-        cur = conn.cursor()
-        # execute the INSERT statement
-        cur.execute(sql, (fk_var,name,value,groups,))
-        # get the generated id back
-        info_id = cur.fetchone()[0]
-        # commit the changes to the database
-        conn.commit()
-        # close communication with the database
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
- 
-    return info_id
-    
-def insert_sample(fk_var,name,ale1,ale2):
-
-
-    """ insert a new sample into the samples table """
-    sql = """INSERT INTO sample(fk_var,name,ale1,ale2)
-             VALUES(%s,%s,%s,%s) RETURNING sample_id;"""
-    conn = None
-    sample_id = None
-    try:
-        # read database configuration
-        params = config()
-        # connect to the PostgreSQL database
-        conn = psycopg2.connect(**params)
-        # create a new cursor
-        cur = conn.cursor()
-        # execute the INSERT statement
-        cur.execute(sql, (fk_var,name,ale1,ale2,))
-        # get the generated id back
-        sample_id = cur.fetchone()[0]
-        # commit the changes to the database
-        conn.commit()
-        # close communication with the database
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
- 
-    return sample_id
-
-
-def insert_gt_fields(fk_sample,name,value):
-
-
-    """ insert a new gt field into the gt_fields table """
-    sql = """INSERT INTO gt_fields(fk_sample,name,value)
-             VALUES(%s,%s,%s) RETURNING gt_fields_id;"""
-    conn = None
-    gt_fields_id = None
-    try:
-        # read database configuration
-        params = config()
-        # connect to the PostgreSQL database
-        conn = psycopg2.connect(**params)
-        # create a new cursor
-        cur = conn.cursor()
-        # execute the INSERT statement
-        cur.execute(sql, (fk_sample,name,value,))
-        # get the generated id back
-        gt_fields_id = cur.fetchone()[0]
-        # commit the changes to the database
-        conn.commit()
-        # close communication with the database
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
- 
-    return gt_fields_id
-
-
+                FOREIGN KEY (fk_sample) REFERENCES SAMPLE (sample_id) ON UPDATE CASCADE ON DELETE CASCADE
+                );\n""") 
 
 def main():
 
@@ -901,21 +901,19 @@ def main():
         print "The name of the file to process is: ", args.file
     
     #connect()
-    drop_tables()
-    create_tables()
-    read_vcf(args.file)
 
+    f_out = create_output_file()
+    
+    drop_tables(f_out)
+    create_tables(f_out)
 
+    read_vcf(args.file,f_out)
+
+    close_output_file(f_out)
+   
     return 0
 
 
 main()
-
-
-
-
-
-
-
 
 
