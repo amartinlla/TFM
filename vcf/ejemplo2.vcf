@@ -1,0 +1,20 @@
+##fileformat=VCFv4.0
+##fileDate=20090805
+##source=myImputationProgramV3.1
+##reference=1000GenomesPilot-NCBI36
+##phasing=partial
+##INFO=<ID=AN,Number=1,Type=Integer,Description="Total	number	of	alleles	in	called	genotypes">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total	Depth">
+##INFO=<ID=AF,Number=.,Type=Float,Description="Allele	Frequency">
+##INFO=<ID=CSQ,Number=.,Type=String,Description="Consequence annotations from Ensembl VEP. Format: Allele|Consequence|IMPACT|SYMBOL|Gene|Feature_type|Feature|BIOTYPE|EXON|INTRON|HGVSc|HGVSp|cDNA_position|CDS_position|Protein_position|Amino_acids|Codons|Existing_variation|DISTANCE|STRAND|FLAGS|SYMBOL_SOURCE|HGNC_ID|SOURCE|gnomadEx|gnomadEx_AC_raw|gnomadEx_DP_HIST_ALT|gnomadEx_AN_raw|SIFT|PolyPhen|LoFtool|CADD_PHRED|CADD_RAW">
+##FILTER=<ID=q10,Description="Quality	below	10">
+##FILTER=<ID=s50,Description="Less	than	50%	of	samples	have	data">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype	Quality">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read	Depth">
+##FORMAT=<ID=HQ,Number=2,Type=Integer,Description="Haplotype	Quality">
+##ALT=<ID=DEL:ME:ALU,Description="Deletion	of	ALU	element">
+##ALT=<ID=CNV,Description="Copy	number	variable	region">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001	NA00002	NA00003
+19	111	2456	A	C	9.6	.	AF=6;CSQ=A|intergenic_variant|MODIFIER||||||||||||||||||||||1:12266-12266|51|33|3|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|11524	GT:HQ	0|0:10,10	0|0:10,10	0/1:3,3
+1	24556478	.	A	C	9.6	PASS	AN=45;CSQ=A|intergenic_variant|MODIFIER||||||||||||||||||||||1:12266-12266|51|33|3|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|11524|sift|erf|0.87|45|-0.30,A|intergenic_variant|MODIFIER||||||||||||||||||||||1:12266-12266|51|33|3|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|11524|sift|erf|0.87|45|-0.30	GT:HQ	0|0:10,10	1|0:10,10	0/1:3,3
