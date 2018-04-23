@@ -343,7 +343,7 @@ def read_vcf(filename,f_out):
         # Insert data in BBDD
         #var_id = insert_variant(record['chrom'],record['pos'],record['ID'],record['ref'],record['alt'],record['qual'],record['filt']) 
 
-        f_out.write('INSERT INTO VARIANT(var_id,chrom,pos,id,ref,alt,qual,filter) VALUES (')
+        f_out.write('INSERT INTO VARIANT(var_id,chrom,pos,id,ref,alt,qual,filter,variation) VALUES (')
         f_out.write(str(num_linea)) 
         f_out.write(',')
         f_out.write(str(record['chrom'])) 
@@ -359,12 +359,14 @@ def read_vcf(filename,f_out):
         f_out.write(str(record['qual'])) 
         f_out.write(",'")
         f_out.write(str(record['filt'])) 
-        f_out.write("');\n")
+        f_out.write(",'")
+        f_out.write(",''")
+        f_out.write(");\n")
 
 
         
         if (csq):    
-        
+ 
             lon = len(str(record['info']['CSQ']).split(","))
             preds = {}
             mafs = {}
@@ -409,28 +411,37 @@ def read_vcf(filename,f_out):
                         f_out.write("');\n")
                       
                     # PREDICTORS          
-                    
-
+                
                     if name == "SIFT":   
                         preds['sift'] = "'" + val +  "'"                 
                         #f_out.write(val)
                         #f_out.write(',')
-                    elif name == "PolyPhen":
+                    else:
+                        preds['sift'] = "''"
+                    if name == "PolyPhen":
                         preds['poly'] = "'" + val +  "'"  
                         #f_out.write(val)
                         #f_out.write(',')
-                    elif name == "LoFtool":
+                    else:
+                        preds['poly'] = "''"
+                    if name == "LoFtool":
                         preds['lof'] = "'" + val +  "'"  
                         #f_out.write(val)
                         #f_out.write(',')
-                    elif name == "CADD_PHRED":
+                    else:
+                        preds['lof'] = "''"
+                    if name == "CADD_PHRED":
                         preds['phred'] = "'" + val +  "'"  
                         #f_out.write(val)
                         #f_out.write(',')
-                    elif name == "CADD_RAW":
+                    else:
+                        preds['phred'] = "''"
+                    if name == "CADD_RAW":
                         preds['raw'] = "'" + val +  "'"  
                         #f_out.write(val)
                         #f_out.write(',')
+                    else:
+                        preds['raw'] = "''"
 
                     # POP_MAFS
                     
@@ -438,29 +449,46 @@ def read_vcf(filename,f_out):
                         mafs['af'] = "'" + val + "'"                
                         #f_out.write(val)
                         #f_out.write(',')
-                    elif name == "gnomAD_AFR_AF":
+                    else:
+                        mafs['af'] = "''"
+                    if name == "gnomAD_AFR_AF":
                         mafs['afr'] =  "'" + val +  "'"
                         #f_out.write(val)
                         #f_out.write(',')
-                    elif name == "gnomAD_AMR_AF":
+                    else:
+                        mafs['afr'] = "''"
+                    if name == "gnomAD_AMR_AF":
                         mafs['amr'] = "'" + val +  "'"  
                         #f_out.write(val)
                         #f_out.write(',')
-                    elif name == "gnomAD_ASJ_AF":
+                    else:
+                        mafs['amr'] = "''"   
+                    if name == "gnomAD_ASJ_AF":
                         mafs['asj'] = "'" + val +  "'"  
                         #f_out.write(val)
                         #f_out.write(',')
-                    elif name == "gnomAD_EAS_AF":
+                    else:
+                        mafs['asj'] = "''"
+                    if name == "gnomAD_EAS_AF":
                         mafs['eas'] = "'" + val +  "'"
-                    elif name == "gnomAD_FIN_AF":
+                    else:
+                        mafs['eas'] = "''"
+                    if name == "gnomAD_FIN_AF":
                         mafs['fin'] = "'" + val +  "'"
-                    elif name == "gnomAD_NFE_AF":
+                    else:
+                        mafs['fin'] = "''"
+                    if name == "gnomAD_NFE_AF":
                         mafs['nfe'] = "'" + val +  "'"
-                    elif name == "gnomAD_OTH_AF":
+                    else:
+                        mafs['nfe'] = "''"
+                    if name == "gnomAD_OTH_AF":
                         mafs['oth'] = "'" + val +  "'"
-                    elif name == "gnomAD_SAS_AF":
+                    else:
+                        mafs['oth'] = "''"
+                    if name == "gnomAD_SAS_AF":
                         mafs['sas'] = "'" + val +  "'"
-
+                    else:
+                        mafs['sas'] = "''"
 
                 f_out.write('INSERT INTO PREDICTORS(fk_trans,sift,polyphen,loftool,cadd_phred,cadd_raw) VALUES (')
                 f_out.write(str(ind+1))
@@ -821,6 +849,7 @@ def create_tables(f):
                 alt varchar(100),
                 qual decimal(20,2),
                 filter varchar(255),
+                variation varchar(255),
                 PRIMARY KEY (var_id)
                 );\n""")  
     f.write("""CREATE TABLE TRANSCRIPT
@@ -915,5 +944,12 @@ def main():
 
 
 main()
+
+
+
+
+
+
+
 
 
