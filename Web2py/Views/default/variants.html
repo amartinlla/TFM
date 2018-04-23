@@ -1,0 +1,52 @@
+{{extend 'layout.html'}}
+{{pass}}
+<script
+  src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js">
+  src="https://cdn.datatables.net/1.10.10/js/dataTables.bootstrap.min.js">
+</script>
+<link rel="stylesheet"
+  media="screen"
+  href="https://cdn.datatables.net/1.10.10/css/dataTables.bootstrap.min.css">
+   <table id="trans-table" class="table table-bordered table-striped" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Consequence</th>
+                <th>Impact</th>
+                <th>Symbol</th>
+                <th> gene</th>
+                <th>feature_type</th>
+                <th>feature</th>
+                <th>Biotype</th>
+                <th>Existing_variation</th>
+                <th>SIFT</th>
+                <th>PolyPhen</th>
+            </tr>
+        </thead>
+    </table>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#trans-table").DataTable({
+        data:  {{=results}},
+        columns: [
+            { data: 'consequence' },
+            { data: 'impact' },
+            { data: 'symbol' },
+            { data: 'gene' },
+            { data: 'feature_type' },
+            { data: 'feature' },
+            { data: 'biotype' },
+            { data: 'Existing_variation' },
+            { data: 'sift' },
+            { data: 'polyphen' }
+            // 'id' omitted to show that you can
+            // use only the fields you choose
+        ]
+    })
+});
+</script>
+
+
+<form>
+      <input type="button" value="volver atrás" name="volver atrás2" onclick="history.back()" />
+</form>
