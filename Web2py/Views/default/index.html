@@ -25,6 +25,12 @@ div.scrollmenu a {
 </head>
 <body>
 {{extend 'layout.html'}}
+<div class="scrollmenu">
+    <a href="#home">HOME</a>
+    <a href="{{=URL('default','user')}}">LOGIN</a>
+    <a href="{{=URL('default','user','register')}}">REGISTER</a>
+    <a href="{{=URL('variants')}}">VARIANTS</a>
+</div>
 <h1>VCFWeb</h1>
 {{if 'message' in globals():}}
 <h3>{{=message}}</h3>
@@ -32,9 +38,7 @@ div.scrollmenu a {
 <p>VCFWeb: a web-based tool for visualizing, filtering and priorizing variants.</p>
 <br></br>
 
-<div class="scrollmenu">
-    <a href="#home">HOME</a>
-    <a href="{{=URL('variants')}}">VARIANTS</a>
-</div>
+
 </body>
 </html>
+
