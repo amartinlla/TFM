@@ -88,11 +88,16 @@ response.form_label_separator = ''
 # host names must be a list of allowed host names (glob syntax allowed)
 auth = Auth(db, host_names=configuration.get('host.names'))
 
+
 # -------------------------------------------------------------------------
 # create all tables needed by auth, maybe add a list of extra fields
 # -------------------------------------------------------------------------
-auth.settings.extra_fields['auth_user'] = []
-auth.define_tables(username=False, signature=False)
+auth.settings.extra_fields['auth_user'] = [
+  Field('address'),
+  Field('city'),
+  Field('zip'),
+  Field('phone')]
+auth.define_tables(username=True,signature=False)
 
 # -------------------------------------------------------------------------
 # configure email
@@ -152,3 +157,4 @@ if configuration.get('scheduler.enabled'):
 # after defining tables, uncomment below to enable auditing
 # -------------------------------------------------------------------------
 # auth.enable_record_versioning(db)
+
