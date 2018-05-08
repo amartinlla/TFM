@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+ #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import collections
@@ -326,11 +326,6 @@ def read_vcf(filename,f_out):
     # Names of the samples
     samples = fields[9:]
     sample_indexes = dict([(x,i) for (i,x) in enumerate(samples)])
-
-
-    if ('CSQ' in dic.keys()):
-        names = str(dic['CSQ'][3]).split('|') # Index 3 corresponds to 'desc'       
-        csq = True
   
     # Now begins the data
     num_linea = 1
@@ -339,11 +334,17 @@ def read_vcf(filename,f_out):
         record = read_data(line,row_pattern, dic,samples,sample_indexes,formats)
         print 'linea', num_linea
         num_linea += 1
+
+        if ('CSQ' in record['info']):
+            names = str(dic['CSQ'][3]).split('|') # Index 3 corresponds to 'desc'       
+            csq = True
+        else:
+            csq = False
       
         # Insert data in BBDD
         #var_id = insert_variant(record['chrom'],record['pos'],record['ID'],record['ref'],record['alt'],record['qual'],record['filt']) 
 
-        f_out.write('INSERT INTO VARIANT(var_id,chrom,pos,id,ref,alt,qual,filter,variation) VALUES (')
+        f_out.write('INSERT INTO VARIANT(var_id,chrom,pos,id,ref,alt,qual,filter) VALUES (')
         f_out.write(str(num_linea)) 
         f_out.write(',')
         f_out.write(str(record['chrom'])) 
@@ -359,9 +360,7 @@ def read_vcf(filename,f_out):
         f_out.write(str(record['qual'])) 
         f_out.write(",'")
         f_out.write(str(record['filt'])) 
-        f_out.write(",'")
-        f_out.write(",''")
-        f_out.write(");\n")
+        f_out.write("');\n")
 
 
         
@@ -370,6 +369,7 @@ def read_vcf(filename,f_out):
             lon = len(str(record['info']['CSQ']).split(","))
             preds = {}
             mafs = {}
+            other = {}
             #for value in values_raw: # for each group of values with CSQ tag
             for ind in range(lon): # for each group of values with CSQ tag
 
@@ -380,6 +380,14 @@ def read_vcf(filename,f_out):
                 for name, val in itertools.izip(names, str(record['info']['CSQ'][ind]).split("|")):  # for each value  
               
                     #print 'insertando...' ,name , val 
+
+                    # EXISTING_VARIATION
+                    if name == "Existing_variation":
+                        f_out.write('INSERT INTO EXISTING_VARIATION(fk_var,name) VALUES (')
+                        f_out.write(str(num_linea))
+                        f_out.write(",'")
+                        f_out.write(val)
+                        f_out.write("');\n")
                 
                     # TRANSCRIPTS
                     
@@ -445,50 +453,164 @@ def read_vcf(filename,f_out):
 
                     # POP_MAFS
                     
-                    if name == "gnomAD_AF":   
-                        mafs['af'] = "'" + val + "'"                
+                    if name == "gnomAD_AF":  
+                        mafs['af'] =  val  
+                        #mafs['af'] = "'" + val + "'"                
                         #f_out.write(val)
                         #f_out.write(',')
                     else:
-                        mafs['af'] = "''"
+                        mafs['af'] = 0
                     if name == "gnomAD_AFR_AF":
-                        mafs['afr'] =  "'" + val +  "'"
+                        mafs['afr'] =  val
                         #f_out.write(val)
                         #f_out.write(',')
                     else:
-                        mafs['afr'] = "''"
+                        mafs['afr'] = 0
                     if name == "gnomAD_AMR_AF":
-                        mafs['amr'] = "'" + val +  "'"  
+                        mafs['amr'] = val
                         #f_out.write(val)
                         #f_out.write(',')
                     else:
-                        mafs['amr'] = "''"   
+                        mafs['amr'] = 0   
                     if name == "gnomAD_ASJ_AF":
-                        mafs['asj'] = "'" + val +  "'"  
+                        mafs['asj'] = val 
                         #f_out.write(val)
                         #f_out.write(',')
                     else:
-                        mafs['asj'] = "''"
+                        mafs['asj'] = 0
                     if name == "gnomAD_EAS_AF":
-                        mafs['eas'] = "'" + val +  "'"
+                        mafs['eas'] = val
                     else:
-                        mafs['eas'] = "''"
+                        mafs['eas'] = 0
                     if name == "gnomAD_FIN_AF":
-                        mafs['fin'] = "'" + val +  "'"
+                        mafs['fin'] = val
                     else:
-                        mafs['fin'] = "''"
+                        mafs['fin'] = 0
                     if name == "gnomAD_NFE_AF":
-                        mafs['nfe'] = "'" + val +  "'"
+                        mafs['nfe'] = val
                     else:
-                        mafs['nfe'] = "''"
+                        mafs['nfe'] = 0
                     if name == "gnomAD_OTH_AF":
-                        mafs['oth'] = "'" + val +  "'"
+                        mafs['oth'] = val
                     else:
-                        mafs['oth'] = "''"
+                        mafs['oth'] = 0
                     if name == "gnomAD_SAS_AF":
-                        mafs['sas'] = "'" + val +  "'"
+                        mafs['sas'] = val
                     else:
-                        mafs['sas'] = "''"
+                        mafs['sas'] = 0
+
+                    # OTHER_INFO
+
+                    if name == "EXON":   
+                        other['exon'] = "'" + val + "'"                
+                    else:
+                        other['exon'] = "''"
+                    if name == "INTRON":   
+                        other['intron'] = "'" + val + "'"                
+                    else:
+                        other['intron'] = "''"
+                    if name == "HGVSc":   
+                        other['HGVSc'] = "'" + val + "'"                
+                    else:
+                        other['HGVSc'] = "''"
+                    if name == "HGVSp":   
+                        other['HGVSp'] = "'" + val + "'"                
+                    else:
+                        other['HGVSp'] = "''"
+                    if name == "cDNA_position":   
+                        other['cDNA'] = "'" + val + "'"                
+                    else:
+                        other['cDNA'] = "''"
+                    if name == "CDS_position":   
+                        other['CDS'] = "'" + val + "'"                
+                    else:
+                        other['CDS'] = "''"
+                    if name == "Proton_position":   
+                        other['proton'] = "'" + val + "'"                
+                    else:
+                        other['proton'] = "''"
+                    if name == "Amino_acids":   
+                        other['amino'] = "'" + val + "'"                
+                    else:
+                        other['amino'] = "''"
+                    if name == "Codons":   
+                        other['codons'] = "'" + val + "'"                
+                    else:
+                        other['codons'] = "''"
+                    if name == "DISTANCE":   
+                        other['distance'] = "'" + val + "'"                
+                    else:
+                        other['distance'] = "''"
+                    if name == "STRAND":   
+                        other['strand'] = "'" + val + "'"                
+                    else:
+                        other['strand'] = "''"
+                    if name == "FLAGS":   
+                        other['flags'] = "'" + val + "'"                
+                    else:
+                        other['flags'] = "''"
+                    if name == "VARIANT_CLASS":   
+                        other['class'] = "'" + val + "'"                
+                    else:
+                        other['class'] = "''"
+                    if name == "SYMBOL_SOURCE":   
+                        other['symbol'] = "'" + val + "'"                
+                    else:
+                        other['symbol'] = "''"
+                    if name == "HGNC_ID":   
+                        other['HGNC_ID'] = "'" + val + "'"                
+                    else:
+                        other['HGNC_ID'] = "''"
+                    if name == "CCDS":   
+                        other['CCDS'] = "'" + val + "'"                
+                    else:
+                        other['CCDS'] = "''"
+                    if name == "ENSP":   
+                        other['ENSP'] = "'" + val + "'"                
+                    else:
+                        other['ENSP'] = "''"
+                    if name == "SWISSPROT":   
+                        other['SWISSPROT'] = "'" + val + "'"                
+                    else:
+                        other['SWISSPROT'] = "''"
+                    if name == "TREMBL":   
+                        other['trembl'] = "'" + val + "'"                
+                    else:
+                        other['trembl'] = "''"
+                    if name == "UNIPARC":   
+                        other['UNIPARC'] = "'" + val + "'"                
+                    else:
+                        other['UNIPARC'] = "''"
+                    if name == "GENE_PHENO":   
+                        other['GENE_PHENO'] = "'" + val + "'"                
+                    else:
+                        other['GENE_PHENO'] = "''"
+                    if name == "DOMAINS":   
+                        other['domains'] = "'" + val + "'"                
+                    else:
+                        other['domains'] = "''"
+                    if name == "HGVS_OFFSET":   
+                        other['offset'] = "'" + val + "'"                
+                    else:
+                        other['offset'] = "''"            
+                    if name == "CLIN_SIG":   
+                        other['CLIN_SIG'] = "'" + val + "'"                
+                    else:
+                        other['CLIN_SIG'] = "''"
+                    if name == "SOMATIC":   
+                        other['SOMATIC'] = "'" + val + "'"                
+                    else:
+                        other['SOMATIC'] = "''"
+                    if name == "PHENO":   
+                        other['PHENO'] = "'" + val + "'"                
+                    else:
+                        other['PHENO'] = "''"
+                    if name == "PUBMED":   
+                        other['PUBMED'] = "'" + val + "'"                
+                    else:
+                        other['PUBMED'] = "''"
+
+                # Writting PREDICTORS
 
                 f_out.write('INSERT INTO PREDICTORS(fk_trans,sift,polyphen,loftool,cadd_phred,cadd_raw) VALUES (')
                 f_out.write(str(ind+1))
@@ -505,31 +627,90 @@ def read_vcf(filename,f_out):
                 f_out.write(');\n')
            
 
+                # Writting POP_MAFS
+
                 f_out.write('INSERT INTO POP_MAFS(fk_trans,af,afr_af,amr_af,asj_af,eas_af,fin_af,nfe_af,oth_af,sas_af) VALUES(')
                 f_out.write(str(ind+1))
                 f_out.write(',')
-                f_out.write(mafs['af'])
+                f_out.write(str(mafs['af']))
                 f_out.write(',')
-                f_out.write(mafs['afr'])  
+                f_out.write(str(mafs['afr']))  
                 f_out.write(',')
-                f_out.write(mafs['amr'])  
+                f_out.write(str(mafs['amr'])) 
                 f_out.write(',')
-                f_out.write(mafs['asj'])  
+                f_out.write(str(mafs['asj']))  
                 f_out.write(',')
-                f_out.write(mafs['eas'])  
+                f_out.write(str(mafs['eas']))  
                 f_out.write(',')
-                f_out.write(mafs['fin'])  
+                f_out.write(str(mafs['fin']))  
                 f_out.write(',')
-                f_out.write(mafs['nfe'])  
+                f_out.write(str(mafs['nfe']))  
                 f_out.write(',')
-                f_out.write(mafs['oth'])  
+                f_out.write(str(mafs['oth']))  
                 f_out.write(',')
-                f_out.write(mafs['sas'])  
+                f_out.write(str(mafs['sas']))  
                 f_out.write(');\n')
 
+                # Writting OTHER_INFO
+                f_out.write('INSERT INTO OTHER_INFO(fk_trans,exon,intron,HGVSc,HGVSp,cDNA,CDS,proton,aminoacids,codons,distance,strand,flags,variant_class,symbol_source,HGNC_ID,CCDS,ENSP,swissprot,trembl,uniparc,gene_pheno,domains,HGVS_OFFSET,CLIN_SIG,SOMATIC,PHENO,PUBMED) VALUES(')
+                f_out.write(str(ind+1))
+                f_out.write(',')
+                f_out.write(other['exon'])                
+                f_out.write(',')     
+                f_out.write(other['intron']) 
+                f_out.write(',')
+                f_out.write(other['HGVSc']) 
+                f_out.write(',')
+                f_out.write(other['HGVSp'])
+                f_out.write(',')
+                f_out.write(other['cDNA']) 
+                f_out.write(',')
+                f_out.write(other['CDS']) 
+                f_out.write(',')
+                f_out.write(other['proton']) 
+                f_out.write(',')
+                f_out.write(other['amino']) 
+                f_out.write(',')
+                f_out.write(other['codons'])
+                f_out.write(',')
+                f_out.write(other['distance'])
+                f_out.write(',')
+                f_out.write(other['strand']) 
+                f_out.write(',')               
+                f_out.write(other['flags']) 
+                f_out.write(',')               
+                f_out.write(other['class'])
+                f_out.write(',')            
+                f_out.write(other['symbol'])  
+                f_out.write(',')               
+                f_out.write(other['HGNC_ID'])
+                f_out.write(',')                 
+                f_out.write(other['CCDS'])  
+                f_out.write(',')               
+                f_out.write(other['ENSP']) 
+                f_out.write(',')                
+                f_out.write(other['SWISSPROT'])  
+                f_out.write(',')               
+                f_out.write(other['trembl'])  
+                f_out.write(',')               
+                f_out.write(other['UNIPARC'])   
+                f_out.write(',')              
+                f_out.write(other['GENE_PHENO']) 
+                f_out.write(',')                
+                f_out.write(other['domains'])  
+                f_out.write(',')               
+                f_out.write(other['offset'])  
+                f_out.write(',')               
+                f_out.write(other['CLIN_SIG'])  
+                f_out.write(',')               
+                f_out.write(other['SOMATIC']) 
+                f_out.write(',')                
+                f_out.write(other['PHENO'])
+                f_out.write(',')                 
+                f_out.write(other['PUBMED'])                 
+                f_out.write(');\n')
 
-            # VALUES(%s,%s,%s,%s,%s)                  
-                    #f_out.write('INSERT INTO info(fk_var,name,value,groups) VALUES(',var_id,',',name,',',val,',''CSQ'');\n')
+           
                     
         sample_id = 0   
         for i in sample_indexes: # for each sample
@@ -563,7 +744,8 @@ def read_vcf(filename,f_out):
                     f_out.write(field)
                     f_out.write("','")
                     value = record['samples'][i][field]
-                    f_out.write(str(value))
+                    # Remove ' if exists
+                    f_out.write(str(value).replace("'",""))
                     f_out.write("');\n")
             
 
@@ -831,11 +1013,13 @@ def close_output_file(f):
 
 def drop_tables(f):
     f.write("DROP TABLE IF EXISTS VARIANT CASCADE;\n")  
+    f.write("DROP TABLE IF EXISTS EXISTING_VARIATION CASCADE;\n") 
     f.write("DROP TABLE IF EXISTS TRANSCRIPT CASCADE;\n")  
     f.write("DROP TABLE IF EXISTS PREDICTORS CASCADE;\n")  
     f.write("DROP TABLE IF EXISTS POP_MAFS CASCADE;\n")  
     f.write("DROP TABLE IF EXISTS GT_FIELDS CASCADE;\n") 
-    f.write("DROP TABLE IF EXISTS SAMPLE CASCADE;\n")                
+    f.write("DROP TABLE IF EXISTS SAMPLE CASCADE;\n")    
+    f.write("DROP TABLE IF EXISTS OTHER_INFO CASCADE;\n")               
     
 
 def create_tables(f):
@@ -849,9 +1033,16 @@ def create_tables(f):
                 alt varchar(100),
                 qual decimal(20,2),
                 filter varchar(255),
-                variation varchar(255),
                 PRIMARY KEY (var_id)
-                );\n""")  
+                );\n""") 
+    f.write("""CREATE TABLE EXISTING_VARIATION
+                (
+                id SERIAL,
+                fk_var integer NOT NULL,
+                name varchar(255),
+                PRIMARY KEY (id),
+                FOREIGN KEY (fk_var) REFERENCES VARIANT (var_id) ON UPDATE CASCADE ON DELETE CASCADE
+                );\n""")                 
     f.write("""CREATE TABLE TRANSCRIPT
                 (
                 trans_id SERIAL,
@@ -883,18 +1074,55 @@ def create_tables(f):
                 (
 				mafs_id SERIAL,
                 fk_trans integer NOT NULL,
-				af varchar(100),
-				afr_af varchar(100),
-				amr_af varchar(100),
-				asj_af varchar(100),
-				eas_af varchar(100),
-				fin_af varchar(100),
-				nfe_af varchar(100),
-				oth_af varchar(100),
-				sas_af varchar(100),
+				af float(4),
+				afr_af float(4),
+				amr_af float(4),
+				asj_af float(4),
+				eas_af float(4),
+				fin_af float(4),
+				nfe_af float(4),
+				oth_af float(4),
+				sas_af float(4),
                 PRIMARY KEY (mafs_id),
                 FOREIGN KEY (fk_trans) REFERENCES TRANSCRIPT (trans_id) ON UPDATE CASCADE ON DELETE CASCADE
-                );\n""")  
+                );\n""") 
+
+    f.write("""CREATE TABLE OTHER_INFO
+                (
+                other_id SERIAL,
+                fk_trans integer NOT NULL,
+                exon varchar(100),
+                intron varchar(100),
+                HGVSc varchar(100),
+                HGVSp varchar(100),
+                cDNA varchar(100),
+                CDS varchar(100),
+                proton varchar(100),
+                aminoacids varchar(100),
+                codons varchar(100),
+                distance varchar(100),
+                strand varchar(100),
+                flags varchar(100),
+                variant_class varchar(100),
+                symbol_source varchar(100),
+                HGNC_ID varchar(100),
+                CCDS varchar(100),
+                ENSP varchar(100),
+                swissprot varchar(100),
+                trembl varchar(100),
+                uniparc varchar(100),
+                gene_pheno varchar(100),
+                domains varchar(100),
+                HGVS_OFFSET varchar(100),
+                CLIN_SIG varchar(100),
+                SOMATIC varchar(100),
+                PHENO varchar(100),
+                PUBMED varchar(100),				
+                PRIMARY KEY (other_id),
+                FOREIGN KEY (fk_trans) REFERENCES TRANSCRIPT (trans_id) ON UPDATE CASCADE ON DELETE CASCADE
+                );\n""") 
+
+     
     f.write("""CREATE TABLE SAMPLE
                 (
                 sample_id SERIAL,
@@ -944,6 +1172,7 @@ def main():
 
 
 main()
+
 
 
 
