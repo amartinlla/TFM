@@ -10,7 +10,7 @@ def index():
 
     return dict(message=T('Welcome to VCFWeb!'))
 
-
+#@auth.requires_login()
 def variants():
 
     import json
@@ -20,9 +20,12 @@ def variants():
     # Rows can't be serialized because they contain a reference to
     # an open database connection. Use as_list()
     # to serialize the query result.
- 
-    data = json.dumps(db.executesql('SELECT * FROM TRANSCRIPT INNER JOIN PREDICTORS ON TRANSCRIPT.trans_id=PREDICTORS.fk_trans;',as_dict=True))
+    #data = json.dumps(db(db.TRANSCRIPT).select().as_list())
 
+    data = json.dumps(db.executesql('SELECT consequence, impact, symbol, biotype, sift, polyphen, name, max_freq FROM TRANSCRIPT INNER JOIN PREDICTORS ON TRANSCRIPT.trans_id=PREDICTORS.fk_trans INNER JOIN VARIANT ON VARIANT.var_id=TRANSCRIPT.fk_var INNER JOIN EXISTING_VARIATION ON VARIANT.var_id=EXISTING_VARIATION.fk_var INNER JOIN (select fk_trans,max(freq) as max_freq from (select fk_trans, max(afr_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(amr_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(asj_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(eas_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(fin_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(nfe_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(oth_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(sas_af) as freq from pop_mafs group by fk_trans )a group by fk_trans) b ON b.fk_trans=TRANSCRIPT.trans_id;',as_dict=True))
+    #data2 = db.executesql('SELECT name FROM VARIANT INNER JOIN EXISTING_VARIATION ON VARIANT.var_id=EXISTING_VARIATION.fk_var;',as_dict=True)
+    #mafs = db.executesql('select max(freq) from (select fk_trans, max(afr_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(amr_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(asj_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(eas_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(fin_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(nfe_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(oth_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(sas_af) as freq from pop_mafs group by fk_trans )a;',as_dict=True)
+    #data3 = data + str(mafs)
     # Convert to XML for DataTable
     return dict(results=XML(data))
 
@@ -31,7 +34,10 @@ def variants():
 @auth.requires_login()
 def api_get_user_email():
     if not request.env.request_method == 'GET': raise HTTP(403)
-    return response.json({'status':'success', 'email':auth.user.email})
+    return response.json({'status':'success', 'email*':auth.user.email})
+
+def hello():
+    return dict(message='Hello %(first_name)s' % auth.user)
 
 # ---- Smart Grid (example) -----
 @auth.requires_membership('admin') # can only be accessed by members of admin groupd
@@ -64,7 +70,14 @@ def user():
     to decorate functions that need access control
     also notice there is http://..../[app]/appadmin/manage/auth to allow administrator to manage users
     """
+
     return dict(form=auth())
+
+
+def milogin(): return dict(formulario=auth.login())
+def milogout(): return dict(formulario=auth.logout())
+def miregistro(): return dict(formulario=auth.register())
+def miperfil(): return dict(formulario=auth.profile())
 
 # ---- action to server uploaded static content (required) ---
 @cache.action()
