@@ -1,0 +1,102 @@
+{{extend 'layout.html'}}
+{{pass}}
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.flash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.print.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+
+   <h3>Variant Information</h3>
+   <table id="trans-table" class="table table-bordered table-striped" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Consequence</th>
+                <th>Impact</th>
+                <th>Symbol</th>
+                <th>Feature type</th>
+                <th>Biotype</th>
+                <th>Existing_variation</th>
+                <th>SIFT</th>
+                <th>PolyPhen</th>
+                <th>Loftool</th>
+                <th>Cadd_phred</th>
+                <th>MAX_FREQ</th>
+            </tr>
+        </thead>
+       <tfoot>
+            <tr>
+                <th>Consequence</th>
+                <th>Impact</th>
+                <th>Symbol</th>
+                <th>Feature_type</th>
+                <th>Biotype</th>
+                <th>Existing_variation</th>
+                <th>SIFT</th>
+                <th>PolyPhen</th>
+                <th>Loftool</th>
+                <th>Cadd_phred</th>
+                <th>MAX_MAF</th>
+            </tr>
+        </tfoot>
+    </table>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+
+    var table = $("#trans-table").DataTable({
+        data:  {{=results}},
+        columns: [
+            { data: 'consequence' },
+            { data: 'impact' },
+            { data: 'symbol' },
+            { data: 'feature_type' },
+            { data: 'biotype' },
+            { data: 'name' },
+            { data: 'sift' },
+            { data: 'polyphen' },
+            { data: 'loftool' },
+            { data: 'cadd_phred' },
+            { data: 'max_af' }
+        ]
+    });
+
+     // Setup - add a text input to each footer cell
+    $('#trans-table tfoot th').each( function (i) {
+        var title = $('#trans-table thead th').eq( $(this).index() ).text();
+
+        $(this).html( '<input type="text" placeholder="Search '+title+'" data-index="'+i+'" />' );
+    } );
+
+    // Filter event handler
+    $( table.table().container() ).on( 'keyup', 'tfoot input', function () {
+        table
+            .column( $(this).data('index') )
+            .search( this.value )
+            .draw();
+    } );
+
+    $('input.column_filter').on( 'keyup click', function () {
+        filterColumn( $(this).parents('tr').attr('data-column') );
+    } );
+
+});
+
+</script>
+
+<form>
+      <input type="button" value="volver atrás" name="volver atrás2" onclick="history.back()" />
+</form>
