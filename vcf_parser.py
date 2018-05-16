@@ -10,6 +10,7 @@ import gzip
 import itertools
 
 import psycopg2, psycopg2.extras
+import ast
 
 
 try:
@@ -369,7 +370,7 @@ def read_vcf(filename,f_out):
             lon = len(str(record['info']['CSQ']).split(","))
             preds = {}
             mafs = {}
-            other = {}
+            #other = {}
             #for value in values_raw: # for each group of values with CSQ tag
             for ind in range(lon): # for each group of values with CSQ tag
 
@@ -377,7 +378,8 @@ def read_vcf(filename,f_out):
 
                 f_out.write(str(num_linea))
                 f_out.write(",'")
-                for name, val in itertools.izip(names, str(record['info']['CSQ'][ind]).split("|")):  # for each value  
+                # for each transcript  
+                for name, val in itertools.izip(names, str(record['info']['CSQ'][ind]).split("|")):  
               
                     #print 'insertando...' ,name , val 
 
@@ -452,55 +454,76 @@ def read_vcf(filename,f_out):
                         preds['raw'] = "''"
 
                     # POP_MAFS
-                    
-                    if name == "gnomAD_AF":  
-                        mafs['af'] =  val  
-                        #mafs['af'] = "'" + val + "'"                
-                        #f_out.write(val)
-                        #f_out.write(',')
+                   
+                    if name == "gnomAD_AF": 
+                        if(val == ""):
+                            mafs['af'] = 0
+                        else:
+                            mafs['af'] =  val
+                            #print mafs['af']
                     else:
                         mafs['af'] = 0
                     if name == "gnomAD_AFR_AF":
-                        mafs['afr'] =  val
-                        #f_out.write(val)
-                        #f_out.write(',')
+                        if(val == ""):
+                            mafs['afr'] = 0
+                        else:
+                            mafs['afr'] =  val 
                     else:
                         mafs['afr'] = 0
                     if name == "gnomAD_AMR_AF":
-                        mafs['amr'] = val
-                        #f_out.write(val)
-                        #f_out.write(',')
+                        if(val == ""):
+                            mafs['amr'] = 0
+                        else:
+                            mafs['amr'] = val 
                     else:
                         mafs['amr'] = 0   
                     if name == "gnomAD_ASJ_AF":
-                        mafs['asj'] = val 
-                        #f_out.write(val)
-                        #f_out.write(',')
+                        if(val == ""):
+                            mafs['asj'] = 0
+                        else:
+                            mafs['asj'] = val  
                     else:
                         mafs['asj'] = 0
                     if name == "gnomAD_EAS_AF":
-                        mafs['eas'] = val
+                        if(val == ""):
+                            mafs['eas'] = 0
+                        else:
+                            mafs['eas'] = val 
                     else:
                         mafs['eas'] = 0
                     if name == "gnomAD_FIN_AF":
-                        mafs['fin'] = val
+                        if(val == ""):
+                            mafs['fin'] = 0
+                        else:
+                            mafs['fin'] = val 
                     else:
                         mafs['fin'] = 0
                     if name == "gnomAD_NFE_AF":
-                        mafs['nfe'] = val
+                        if(val == ""):
+                            mafs['nfe'] = 0
+                        else:
+                            mafs['nfe'] = val 
                     else:
                         mafs['nfe'] = 0
                     if name == "gnomAD_OTH_AF":
-                        mafs['oth'] = val
+                        if(val == ""):
+                            mafs['oth'] = 0
+                        else:
+                            mafs['oth'] = val 
                     else:
                         mafs['oth'] = 0
-                    if name == "gnomAD_SAS_AF":
-                        mafs['sas'] = val
+                    if name == "gnomAD_SAS_AF":                     
+                        if(val == ""):
+                            mafs['sas'] = 0
+                        else:
+                            print val    
+                            mafs['sas'] = val
                     else:
                         mafs['sas'] = 0
 
                     # OTHER_INFO
 
+                    '''
                     if name == "EXON":   
                         other['exon'] = "'" + val + "'"                
                     else:
@@ -609,7 +632,7 @@ def read_vcf(filename,f_out):
                         other['PUBMED'] = "'" + val + "'"                
                     else:
                         other['PUBMED'] = "''"
-
+                    '''
                 # Writting PREDICTORS
 
                 f_out.write('INSERT INTO PREDICTORS(fk_trans,sift,polyphen,loftool,cadd_phred,cadd_raw) VALUES (')
@@ -629,8 +652,11 @@ def read_vcf(filename,f_out):
 
                 # Writting POP_MAFS
 
-                f_out.write('INSERT INTO POP_MAFS(fk_trans,af,afr_af,amr_af,asj_af,eas_af,fin_af,nfe_af,oth_af,sas_af) VALUES(')
+                f_out.write('INSERT INTO POP_MAFS(fk_trans,max_af,af,afr_af,amr_af,asj_af,eas_af,fin_af,nfe_af,oth_af,sas_af) VALUES(')
                 f_out.write(str(ind+1))
+                f_out.write(',')
+         
+                f_out.write(str(max([mafs['afr'],mafs['amr'],mafs['asj'],mafs['eas'],mafs['fin'],mafs['nfe'],mafs['oth'],mafs['sas']])))
                 f_out.write(',')
                 f_out.write(str(mafs['af']))
                 f_out.write(',')
@@ -650,8 +676,10 @@ def read_vcf(filename,f_out):
                 f_out.write(',')
                 f_out.write(str(mafs['sas']))  
                 f_out.write(');\n')
+                #print mafs['sas']
 
                 # Writting OTHER_INFO
+                '''
                 f_out.write('INSERT INTO OTHER_INFO(fk_trans,exon,intron,HGVSc,HGVSp,cDNA,CDS,proton,aminoacids,codons,distance,strand,flags,variant_class,symbol_source,HGNC_ID,CCDS,ENSP,swissprot,trembl,uniparc,gene_pheno,domains,HGVS_OFFSET,CLIN_SIG,SOMATIC,PHENO,PUBMED) VALUES(')
                 f_out.write(str(ind+1))
                 f_out.write(',')
@@ -709,7 +737,7 @@ def read_vcf(filename,f_out):
                 f_out.write(',')                 
                 f_out.write(other['PUBMED'])                 
                 f_out.write(');\n')
-
+                '''
            
                     
         sample_id = 0   
@@ -1074,6 +1102,7 @@ def create_tables(f):
                 (
 				mafs_id SERIAL,
                 fk_trans integer NOT NULL,
+                max_af float(4),
 				af float(4),
 				afr_af float(4),
 				amr_af float(4),
