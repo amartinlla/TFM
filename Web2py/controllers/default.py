@@ -3,14 +3,30 @@
 # This is a sample controller
 # this file is released under public domain and you can use without limitations
 # -------------------------------------------------------------------------
+import logging
+from gluon.storage import Storage
 
-# ---- example index page ----
+
+logger = logging.getLogger("web2py.app.vcfweb")
+logger.setLevel(logging.DEBUG)
+
 
 def index():
+    #if auth.user.username == session.auth.user.username:
+    if auth.is_logged_in():
+        redirect(URL('variants'))
+        #redirect(URL('..','VCFWeb/filters'))
+    else:
+        return dict(message=T('Welcome to web2py!'))
 
-    return dict(message=T('Welcome to VCFWeb!'))
+def user():
+    return dict(form=auth())
 
-#@auth.requires_login()
+def next():
+    return dict()
+
+
+@auth.requires_login()
 def variants():
 
     import json
@@ -21,14 +37,35 @@ def variants():
     # an open database connection. Use as_list()
     # to serialize the query result.
     #data = json.dumps(db(db.TRANSCRIPT).select().as_list())
+    data = json.dumps(db.executesql('SELECT * FROM AUX2 INNER JOIN POP_MAFS ON POP_MAFS.fk_trans=AUX2.trans_id;',as_dict=True))
 
-    data = json.dumps(db.executesql('SELECT consequence, impact, symbol,feature_type, biotype, sift, polyphen, loftool, cadd_phred, name, max_af FROM TRANSCRIPT  INNER JOIN PREDICTORS ON TRANSCRIPT.trans_id=PREDICTORS.fk_trans INNER JOIN POP_MAFS ON POP_MAFS.fk_trans=TRANSCRIPT.trans_id INNER JOIN VARIANT ON VARIANT.var_id=TRANSCRIPT.fk_var INNER JOIN EXISTING_VARIATION ON VARIANT.var_id=EXISTING_VARIATION.fk_var;',as_dict=True))
-    #data2 = db.executesql('SELECT name FROM VARIANT INNER JOIN EXISTING_VARIATION ON VARIANT.var_id=EXISTING_VARIATION.fk_var;',as_dict=True)
-    #mafs = db.executesql('select max(freq) from (select fk_trans, max(afr_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(amr_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(asj_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(eas_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(fin_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(nfe_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(oth_af) as freq from pop_mafs group by fk_trans union all select fk_trans,  max(sas_af) as freq from pop_mafs group by fk_trans )a;',as_dict=True)
-    #data3 = data + str(mafs)
     # Convert to XML for DataTable
     return dict(results=XML(data))
 
+@auth.requires_login()
+def v2():
+
+    import json
+
+    data = json.dumps(db.executesql('SELECT * FROM AUX2 INNER JOIN POP_MAFS ON POP_MAFS.fk_trans=AUX2.trans_id;',as_dict=True))
+
+    # Convert to XML for DataTable
+    return dict(all=XML(data))
+
+@auth.requires_login()
+def filters():
+    import json
+
+    # Select all the records, to show how
+    # datatables.net paginates.
+    # Rows can't be serialized because they contain a reference to
+    # an open database connection. Use as_list()
+    # to serialize the query result.
+    #data = json.dumps(db(db.TRANSCRIPT).select().as_list())
+    data = json.dumps(db.executesql('SELECT * FROM AUX2 INNER JOIN POP_MAFS ON POP_MAFS.fk_trans=AUX2.trans_id;',as_dict=True))
+
+    # Convert to XML for DataTable
+    return dict(results=XML(data))
 
 # ---- API (example) -----
 @auth.requires_login()
@@ -53,31 +90,7 @@ def wiki():
     auth.wikimenu() # add the wiki to the menu
     return auth.wiki() 
 
-# ---- Action for login/register/etc (required for auth) -----
-def user():
-    """
-    exposes:
-    http://..../[app]/default/user/login
-    http://..../[app]/default/user/logout
-    http://..../[app]/default/user/register
-    http://..../[app]/default/user/profile
-    http://..../[app]/default/user/retrieve_password
-    http://..../[app]/default/user/change_password
-    http://..../[app]/default/user/bulk_register
-    use @auth.requires_login()
-        @auth.requires_membership('group name')
-        @auth.requires_permission('read','table name',record_id)
-    to decorate functions that need access control
-    also notice there is http://..../[app]/appadmin/manage/auth to allow administrator to manage users
-    """
 
-    return dict(form=auth())
-
-
-def milogin(): return dict(formulario=auth.login())
-def milogout(): return dict(formulario=auth.logout())
-def miregistro(): return dict(formulario=auth.register())
-def miperfil(): return dict(formulario=auth.profile())
 
 # ---- action to server uploaded static content (required) ---
 @cache.action()
