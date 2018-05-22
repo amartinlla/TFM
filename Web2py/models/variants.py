@@ -1,127 +1,38 @@
 # -*- coding: utf-8 -*-
+# try something like
+#@auth.requires_login()
+def index():
+    import json
 
-import psycopg2
+    # Select all the records, to show how
+    # datatables.net paginates.
+    # Rows can't be serialized because they contain a reference to
+    # an open database connection. Use as_list()
+    # to serialize the query result.
+    #data = json.dumps(db(db.TRANSCRIPT).select().as_list())
+    data = json.dumps(db.executesql('SELECT * FROM AUX2 INNER JOIN POP_MAFS ON POP_MAFS.fk_trans=AUX2.trans_id;',as_dict=True))
 
-db =  DAL('postgres://test2:test2@localhost/estudio1',pool_size=0,lazy_tables=True) # The database is now connected and the connection is stored in the global variable db.
+    # Convert to XML for DataTable
+    return dict(results=XML(data))
 
-print db._uri # Uniform Resource Identifier
-print db._dbname
+def secret():
+   conditions = [request.client == '127.0.0.1', auth.user]
+   if not any(conditions):
+       redirect(URL('user', args='login'))
+   return dict(message='Hello test2 again!')
 
-db.define_table('VARIANT',
-Field('var_id','integer'),
-Field('chrom','integer'),
-Field('pos','integer'),
-Field('id'),
-Field('ref'),
-Field('alt'),
-Field('qual'),
-Field('filter'),
-migrate=True)
-db.VARIANT.var_id.requires = IS_NOT_IN_DB(db, db.VARIANT.var_id)
-db.VARIANT.chrom.requires = IS_NOT_IN_DB(db, db.VARIANT.chrom)
-db.VARIANT.pos.requires = IS_NOT_IN_DB(db, db.VARIANT.pos)
+#@auth.requires_login()
+def variants():
 
-db.define_table('EXISTING_VARIATION',
-Field('id','integer'),
-Field('fk_var','integer'),
-Field('name'),
-migrate=True)
-db.EXISTING_VARIATION.id.requires = IS_NOT_IN_DB(db, db.EXISTING_VARIATION.id)
-db.EXISTING_VARIATION.fk_var.requires = IS_NOT_IN_DB(db, db.EXISTING_VARIATION.fk_var)
-db.EXISTING_VARIATION.fk_var.requires = IS_IN_DB(db, db.VARIANT.var_id, '%(nombre)s')
+    import json
 
-db.define_table('TRANSCRIPT',
-Field('trans_id','integer'),
-Field('fk_var','integer'),
-Field('allele'),
-Field('consequence'),
-Field('impact'),
-Field('symbol'),
-Field('gene'),
-Field('feature_type'),
-Field('feature'),
-Field('biotype'),
-migrate=True)
-db.TRANSCRIPT.trans_id.requires = IS_NOT_IN_DB(db, db.TRANSCRIPT.trans_id)
-db.TRANSCRIPT.fk_var.requires = IS_NOT_IN_DB(db, db.TRANSCRIPT.fk_var)
-db.TRANSCRIPT.fk_var.requires = IS_IN_DB(db, db.VARIANT.var_id, '%(nombre)s')
+    # Select all the records, to show how
+    # datatables.net paginates.
+    # Rows can't be serialized because they contain a reference to
+    # an open database connection. Use as_list()
+    # to serialize the query result.
+    #data = json.dumps(db(db.TRANSCRIPT).select().as_list())
+    data = json.dumps(db.executesql('SELECT * FROM AUX2 INNER JOIN POP_MAFS ON POP_MAFS.fk_trans=AUX2.trans_id;',as_dict=True))
 
-db.define_table('PREDICTORS',
-Field('pred_id','integer'),
-Field('fk_trans','integer'),
-Field('sift'),
-Field('polyphen'),
-Field('loftool'),
-Field('cadd_phred'),
-Field('cadd_raw'),
-migrate=True)
-db.PREDICTORS.pred_id.requires = IS_NOT_IN_DB(db, db.PREDICTORS.pred_id)
-db.PREDICTORS.fk_trans.requires = IS_NOT_IN_DB(db, db.PREDICTORS.fk_trans)
-db.PREDICTORS.fk_trans.requires = IS_IN_DB(db, db.TRANSCRIPT.trans_id, '%(nombre)s')
-
-
-db.define_table('POP_MAFS',
-Field('mafs_id','integer'),
-Field('fk_trans','integer'),
-Field('max_af'),
-Field('af'),
-Field('afr_af'),
-Field('amr_af'),
-Field('asj_af'),
-Field('eas_af'),
-Field('fin_af'),
-Field('nfe_af'),
-Field('oth_af'),
-Field('sas_af'),
-migrate=True)
-db.POP_MAFS.mafs_id.requires = IS_NOT_IN_DB(db, db.POP_MAFS.mafs_id)
-db.POP_MAFS.fk_trans.requires = IS_NOT_IN_DB(db, db.POP_MAFS.fk_trans)
-db.POP_MAFS.fk_trans.requires = IS_IN_DB(db, db.TRANSCRIPT.trans_id, '%(nombre)s')
-
-
-db.define_table('OTHER_INFO',
-Field('other_id','integer'),
-Field('fk_trans','integer'),
-Field('exon'),
-Field('intron'),
-Field('HGVSc'),
-Field('HGVSp'),
-Field('cDNA'),
-Field('CDS'),
-Field('proton'),
-Field('aminoacids'),
-Field('codons'),
-Field('distance'),
-Field('strand'),
-Field('flags'),
-Field('variant_class'),
-Field('symbol_source'),
-Field('HGNC_ID'),
-Field('CCDS'),
-Field('ENSP'),
-Field('swissprot'),
-Field('trembl'),
-Field('uniparc'),
-Field('gene_pheno'),
-Field('domains'),
-Field('HGVS_OFFSET'),
-Field('CLIN_SIG'),
-Field('SOMATIC'),
-Field('PHENO'),
-Field('PUBMED'),
-migrate=True)
-db.OTHER_INFO.other_id.requires = IS_NOT_IN_DB(db, db.OTHER_INFO.other_id)
-db.OTHER_INFO.fk_trans.requires = IS_NOT_IN_DB(db, db.OTHER_INFO.fk_trans)
-db.OTHER_INFO.fk_trans.requires = IS_IN_DB(db, db.TRANSCRIPT.trans_id, '%(nombre)s')
-
-
-
-#for reg in db().select(db.VARIANT.ALL):
-#    print reg.var_id
-
-#print db.executesql('SELECT * FROM VARIANT;')
-
-# If no database exists, generate a database of 101 unique records
-# with names in the form John1 Smith1, John43 Smith43, etc.
-#if db(db.variant).isempty():
-#    print 'variant table is empty'
+    # Convert to XML for DataTable
+    return dict(results=XML(data))
