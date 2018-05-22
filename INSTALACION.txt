@@ -14,51 +14,8 @@ sudo apt-get install python-tk
 
 - INSTALAR BBDD EN UBUNTU
 -----------------------------------------------------------------------
-https://www.digitalocean.com/community/tutorials/como-instalar-y-utilizar-postgresql-en-ubuntu-16-04-es
-
     sudo apt-get update
     sudo apt-get install postgresql postgresql-contrib
-
-
-- Acceso a la Consola de Postgres sin Cambiar de Cuentas
-(el $ indica que se hace desde línea de comandos, fuera de postgresql)
-
-    $ sudo -u postgres psql
-
-
-- Salir de la sesión interactiva de Postgres:
-
-    psql=# \q
-
--Crear un Nuevo Rol 
-
-    $ sudo -u postgres createuser <username>
-
-- Crear una base de datos
-
-    $ sudo -u postgres createdb <dbname>
-
-- Dar al usuario una contraseña
-
-    $ sudo -u postgres psql
-    psql=# alter user <username> with encrypted password '<password>';    
-
-- Dar privilegios al usuario en la BBDD
-
-    psql=# grant all privileges on database <dbname> to <username> ;
-
-Si desea que su usuario se conecte a una base de datos diferente, puede hacerlo especificando la base de datos de esta manera:
-
-    psql -d postgres
-
-Una vez conectado, puede comprobar su información de conexión actual escribiendo:
-
-    psql=# \conninfo
-
-Output
-You are connected to database "sammy" as user "sammy" via socket in "/var/run/postgresql" at port "5432".
-
-Esto puede ser útil si se está conectando a bases de datos que no son predeterminadas o con usuarios no predeterminados.
 
 -- CARGAR DATOS EN BBDD A PARTIR DE UN FICHERO .SQL
 ----------------------------------------------------
@@ -67,5 +24,12 @@ psql -U test2 -d estudio1 -f out.sql -h localhost
 
 - EJECUTAR TODO EL PROCESO:
 ---------------------------
-python vcf_parser.py -f vcf/VCFweb_testset.vcf
+python vcf_parser.py -f vcf/NA12878.vcf
 psql -U test2 -d estudio1 -f out.sql -h localhost
+(contraseña: test2)
+
+Acceder a Web2py con:
+
+- Username = test2
+- Password = test2
+
