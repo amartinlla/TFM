@@ -42,15 +42,6 @@ def variants():
     # Convert to XML for DataTable
     return dict(results=XML(data))
 
-@auth.requires_login()
-def v2():
-
-    import json
-
-    data = json.dumps(db.executesql('SELECT * FROM AUX2 INNER JOIN POP_MAFS ON POP_MAFS.fk_trans=AUX2.trans_id;',as_dict=True))
-
-    # Convert to XML for DataTable
-    return dict(all=XML(data))
 
 @auth.requires_login()
 def filters():
@@ -73,8 +64,6 @@ def api_get_user_email():
     if not request.env.request_method == 'GET': raise HTTP(403)
     return response.json({'status':'success', 'email*':auth.user.email})
 
-def hello():
-    return dict(message='Hello %(first_name)s' % auth.user)
 
 # ---- Smart Grid (example) -----
 @auth.requires_membership('admin') # can only be accessed by members of admin groupd
