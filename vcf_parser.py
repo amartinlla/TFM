@@ -329,12 +329,13 @@ def read_vcf(filename,f_out):
     sample_indexes = dict([(x,i) for (i,x) in enumerate(samples)])
   
     # Now begins the data
-    num_linea = 1
+    num_linea = 0
     for line in vcf_file:
 
         record = read_data(line,row_pattern, dic,samples,sample_indexes,formats)
-        print 'linea', num_linea
+        
         num_linea += 1
+        print 'linea', num_linea
 
         if ('CSQ' in record['info']):
             names = str(dic['CSQ'][3]).split('|') # Index 3 corresponds to 'desc'       
@@ -368,20 +369,149 @@ def read_vcf(filename,f_out):
         if (csq):    
  
             lon = len(str(record['info']['CSQ']).split(","))
+            trans = {}
             preds = {}
             mafs = {}
             #other = {}
             #for value in values_raw: # for each group of values with CSQ tag
             for ind in range(lon): # for each group of values with CSQ tag
 
-                f_out.write('INSERT INTO TRANSCRIPT(fk_var,allele,consequence,impact,symbol,gene,feature_type,feature,biotype) VALUES(')
+                # TRANSCRIPTS
 
-                f_out.write(str(num_linea))
-                f_out.write(",'")
+                # Initialization 
+                trans['allele'] = "''"
+                trans['conseq'] = "''"
+                trans['impact'] = "''"
+                trans['symbol'] = "''"
+                trans['gene'] = "''"
+                trans['f_type'] = "''"
+                trans['feature'] = "''"
+                trans['biotype'] = "''"
+                trans['clin_sig'] = "''"
+
+
+                # PREDICTORS   
+
+                # Initialization       
+                preds['sift'] = "''"
+                preds['poly'] = "''"
+                preds['lof'] = "''"
+                preds['phred'] = "''"
+                preds['raw'] = "''"
+
+                # POP_MAFS
+
+                # Initialization 
+                mafs['af'] = 0
+                mafs['afr'] = 0
+                mafs['amr'] = 0
+                mafs['asj'] = 0
+                mafs['eas'] = 0
+                mafs['fin'] = 0
+                mafs['nfe'] = 0
+                mafs['oth'] = 0
+                mafs['sas'] = 0
+
+
                 # for each transcript  
                 for name, val in itertools.izip(names, str(record['info']['CSQ'][ind]).split("|")):  
               
                     #print 'insertando...' ,name , val 
+
+                
+                    # TRANSCRIPTS
+
+                    if name == "Consequence annotations from Ensembl VEP. Format: Allele": 
+                        trans['allele'] = "'" + val +  "'"                            
+                    elif name == "Consequence":
+                        trans['conseq'] = "'" + val +  "'"      
+                    elif name == "IMPACT":
+                        trans['impact'] = "'" + val +  "'"                                     
+                    elif name == "SYMBOL":
+                        trans['symbol'] = "'" + val +  "'"                   
+                    elif name == "Gene":
+                        trans['gene'] = "'" + val +  "'"                  
+                    elif name == "Feature_type":
+                        trans['f_type'] = "'" + val +  "'"        
+                    elif name == "Feature":
+                        trans['feature'] = "'" + val +  "'"
+                    elif name == "BIOTYPE":
+                        trans['biotype'] = "'" + val +  "'"
+                    elif name == "CLIN_SIG":   
+                        trans['clin_sig'] = "'" + val +  "'"                      
+                     
+              
+                    # PREDICTORS                     
+
+                    if name == "SIFT":   
+                        preds['sift'] = "'" + val +  "'"                 
+                    elif name == "PolyPhen":
+                        preds['poly'] = "'" + val +  "'"       
+                    if name == "LoFtool":
+                        preds['lof'] = "'" + val +  "'"                         
+                    if name == "CADD_PHRED":
+                        preds['phred'] = "'" + val +  "'"                        
+                    if name == "CADD_RAW":
+                        preds['raw'] = "'" + val +  "'"  
+                      
+
+                    # POP_MAFS
+                   
+
+                    if name == "gnomAD_AF": 
+                        if(val == ""):
+                            mafs['af'] = 0
+                        else:
+                            mafs['af'] =  val
+                    
+                    elif name == "gnomAD_AFR_AF":                        
+                        if(val == ""):                           
+                            mafs['afr'] = 0
+                        else:                        
+                            mafs['afr'] =  val 
+                   
+                    elif name == "gnomAD_AMR_AF":
+                        if(val == ""):
+                            mafs['amr'] = 0
+                        else:
+                            mafs['amr'] = val 
+   
+                    elif name == "gnomAD_ASJ_AF":
+                        if(val == ""):
+                            mafs['asj'] = 0
+                        else:
+                            mafs['asj'] = val  
+                   
+                    elif name == "gnomAD_EAS_AF":
+                        if(val == ""):
+                            mafs['eas'] = 0
+                        else:
+                            mafs['eas'] = val 
+                    
+                    elif name == "gnomAD_FIN_AF":
+                        if(val == ""):
+                            mafs['fin'] = 0
+                        else:
+                            mafs['fin'] = val 
+                   
+                    elif name == "gnomAD_NFE_AF":
+                        if(val == ""):
+                            mafs['nfe'] = 0
+                        else:
+                            mafs['nfe'] = val 
+                    
+                    elif name == "gnomAD_OTH_AF":
+                        if(val == ""):
+                            mafs['oth'] = 0
+                        else:
+                            mafs['oth'] = val 
+                   
+                    elif name == "gnomAD_SAS_AF":                     
+                        if(val == ""):
+                            mafs['sas'] = 0
+                        else:                                
+                            mafs['sas'] = val
+                                    
 
                     # EXISTING_VARIATION
                     if name == "Existing_variation":
@@ -390,136 +520,6 @@ def read_vcf(filename,f_out):
                         f_out.write(",'")
                         f_out.write(val)
                         f_out.write("');\n")
-                
-                    # TRANSCRIPTS
-                    
-                    if name == "Consequence annotations from Ensembl VEP. Format: Allele":                    
-                        f_out.write(val)
-                        f_out.write("','")            
-                    elif name == "Consequence":
-                        f_out.write(val)
-                        f_out.write("','")
-                    elif name == "IMPACT":
-                        f_out.write(val)
-                        f_out.write("','")                               
-                    elif name == "SYMBOL":
-                        f_out.write(val)
-                        f_out.write("','")                   
-                    elif name == "Gene":
-                        f_out.write(val)
-                        f_out.write("','")                     
-                    elif name == "Feature_type":
-                        f_out.write(val)
-                        f_out.write("','")           
-                    elif name == "Feature":
-                        f_out.write(val)
-                        f_out.write("','")
-                     
-
-                    if name == "BIOTYPE": 
-                        f_out.write(val)
-                        f_out.write("');\n")
-                      
-                    # PREDICTORS          
-                
-                    if name == "SIFT":   
-                        preds['sift'] = "'" + val +  "'"                 
-                        #f_out.write(val)
-                        #f_out.write(',')
-                    else:
-                        preds['sift'] = "''"
-                    if name == "PolyPhen":
-                        preds['poly'] = "'" + val +  "'"  
-                        #f_out.write(val)
-                        #f_out.write(',')
-                    else:
-                        preds['poly'] = "''"
-                    if name == "LoFtool":
-                        preds['lof'] = "'" + val +  "'"  
-                        #f_out.write(val)
-                        #f_out.write(',')
-                    else:
-                        preds['lof'] = "''"
-                    if name == "CADD_PHRED":
-                        preds['phred'] = "'" + val +  "'"  
-                        #f_out.write(val)
-                        #f_out.write(',')
-                    else:
-                        preds['phred'] = "''"
-                    if name == "CADD_RAW":
-                        preds['raw'] = "'" + val +  "'"  
-                        #f_out.write(val)
-                        #f_out.write(',')
-                    else:
-                        preds['raw'] = "''"
-
-                    # POP_MAFS
-                   
-                    if name == "gnomAD_AF": 
-                        if(val == ""):
-                            mafs['af'] = 0
-                        else:
-                            mafs['af'] =  val
-                            #print mafs['af']
-                    else:
-                        mafs['af'] = 0
-                    if name == "gnomAD_AFR_AF":
-                        if(val == ""):
-                            mafs['afr'] = 0
-                        else:
-                            mafs['afr'] =  val 
-                    else:
-                        mafs['afr'] = 0
-                    if name == "gnomAD_AMR_AF":
-                        if(val == ""):
-                            mafs['amr'] = 0
-                        else:
-                            mafs['amr'] = val 
-                    else:
-                        mafs['amr'] = 0   
-                    if name == "gnomAD_ASJ_AF":
-                        if(val == ""):
-                            mafs['asj'] = 0
-                        else:
-                            mafs['asj'] = val  
-                    else:
-                        mafs['asj'] = 0
-                    if name == "gnomAD_EAS_AF":
-                        if(val == ""):
-                            mafs['eas'] = 0
-                        else:
-                            mafs['eas'] = val 
-                    else:
-                        mafs['eas'] = 0
-                    if name == "gnomAD_FIN_AF":
-                        if(val == ""):
-                            mafs['fin'] = 0
-                        else:
-                            mafs['fin'] = val 
-                    else:
-                        mafs['fin'] = 0
-                    if name == "gnomAD_NFE_AF":
-                        if(val == ""):
-                            mafs['nfe'] = 0
-                        else:
-                            mafs['nfe'] = val 
-                    else:
-                        mafs['nfe'] = 0
-                    if name == "gnomAD_OTH_AF":
-                        if(val == ""):
-                            mafs['oth'] = 0
-                        else:
-                            mafs['oth'] = val 
-                    else:
-                        mafs['oth'] = 0
-                    if name == "gnomAD_SAS_AF":                     
-                        if(val == ""):
-                            mafs['sas'] = 0
-                        else:
-                            print val    
-                            mafs['sas'] = val
-                    else:
-                        mafs['sas'] = 0
 
                     # OTHER_INFO
 
@@ -616,10 +616,6 @@ def read_vcf(filename,f_out):
                         other['offset'] = "'" + val + "'"                
                     else:
                         other['offset'] = "''"            
-                    if name == "CLIN_SIG":   
-                        other['CLIN_SIG'] = "'" + val + "'"                
-                    else:
-                        other['CLIN_SIG'] = "''"
                     if name == "SOMATIC":   
                         other['SOMATIC'] = "'" + val + "'"                
                     else:
@@ -633,9 +629,38 @@ def read_vcf(filename,f_out):
                     else:
                         other['PUBMED'] = "''"
                     '''
+
+                # Writting TRANSCRIPTS
+                f_out.write('INSERT INTO TRANSCRIPT(fk_var,allele,consequence,impact,symbol,gene,feature_type,feature,biotype,CLIN_SIG) VALUES(')
+                f_out.write(str(num_linea))
+                f_out.write(",")
+                f_out.write(trans['allele'])
+                f_out.write(',')
+                f_out.write(trans['conseq'])  
+                f_out.write(',')
+                f_out.write(trans['impact'])  
+                f_out.write(',')
+                f_out.write(trans['symbol'])  
+                f_out.write(',')
+                f_out.write(trans['gene'])  
+                f_out.write(',')
+                f_out.write(trans['f_type'])  
+                f_out.write(',')
+                f_out.write(trans['feature'])  
+                f_out.write(',')
+                f_out.write(trans['biotype'])  
+                f_out.write(',')
+                f_out.write(trans['clin_sig'])                  
+                f_out.write(');\n')
+           
+           
+             
+
                 # Writting PREDICTORS
 
-                f_out.write('INSERT INTO PREDICTORS(fk_trans,sift,polyphen,loftool,cadd_phred,cadd_raw) VALUES (')
+                f_out.write('INSERT INTO PREDICTORS(fk_var,fk_trans,sift,polyphen,loftool,cadd_phred,cadd_raw) VALUES (')
+                f_out.write(str(num_linea))
+                f_out.write(",")
                 f_out.write(str(ind+1))
                 f_out.write(',')
                 f_out.write(preds['sift'])
@@ -652,12 +677,15 @@ def read_vcf(filename,f_out):
 
                 # Writting POP_MAFS
 
-                f_out.write('INSERT INTO POP_MAFS(fk_trans,max_af,af,afr_af,amr_af,asj_af,eas_af,fin_af,nfe_af,oth_af,sas_af) VALUES(')
+                f_out.write('INSERT INTO POP_MAFS(fk_var,fk_trans,max_af,af,afr_af,amr_af,asj_af,eas_af,fin_af,nfe_af,oth_af,sas_af) VALUES(')
+                f_out.write(str(num_linea))
+                f_out.write(",")
                 f_out.write(str(ind+1))
                 f_out.write(',')
-         
-                f_out.write(str(max([mafs['afr'],mafs['amr'],mafs['asj'],mafs['eas'],mafs['fin'],mafs['nfe'],mafs['oth'],mafs['sas']])))
+     
+                f_out.write(str(max([float(mafs['afr']),float(mafs['amr']),float(mafs['asj']),float(mafs['eas']),float(mafs['fin']),float(mafs['nfe']),float(mafs['oth']),float(mafs['sas'])])))
                 f_out.write(',')
+                
                 f_out.write(str(mafs['af']))
                 f_out.write(',')
                 f_out.write(str(mafs['afr']))  
@@ -728,9 +756,7 @@ def read_vcf(filename,f_out):
                 f_out.write(other['domains'])  
                 f_out.write(',')               
                 f_out.write(other['offset'])  
-                f_out.write(',')               
-                f_out.write(other['CLIN_SIG'])  
-                f_out.write(',')               
+                f_out.write(',')                             
                 f_out.write(other['SOMATIC']) 
                 f_out.write(',')                
                 f_out.write(other['PHENO'])
@@ -775,10 +801,15 @@ def read_vcf(filename,f_out):
                     # Remove ' if exists
                     f_out.write(str(value).replace("'",""))
                     f_out.write("');\n")
+
+    # TABLAS AUXILIARES PARA ALIGERAR AL FRONT
+    #f_out.write('INSERT INTO AUX1 SELECT VARIANT.var_id,TRANSCRIPT.trans_id, chrom, pos, VARIANT.id, consequence, impact, symbol, gene, feature_type, feature, biotype, sift, polyphen, loftool, cadd_phred, name, max_af FROM TRANSCRIPT  INNER JOIN PREDICTORS ON TRANSCRIPT.trans_id=PREDICTORS.fk_trans INNER JOIN POP_MAFS ON POP_MAFS.fk_trans=TRANSCRIPT.trans_id INNER JOIN VARIANT ON VARIANT.var_id=TRANSCRIPT.fk_var INNER JOIN EXISTING_VARIATION ON VARIANT.var_id=EXISTING_VARIATION.fk_var;')   
+    f_out.write('INSERT INTO AUX1 SELECT DISTINCT VARIANT.var_id,TRANSCRIPT.trans_id, chrom, pos, consequence, impact, symbol, gene, feature_type, feature, BIOTYPE,CLIN_SIG, name FROM TRANSCRIPT INNER JOIN VARIANT ON VARIANT.var_id=TRANSCRIPT.fk_var INNER JOIN EXISTING_VARIATION ON VARIANT.var_id=EXISTING_VARIATION.fk_var;\n')
+    f_out.write('INSERT INTO AUX2 SELECT DISTINCT AUX1.var_id, AUX1.trans_id, chrom, pos, consequence, impact, symbol, gene, feature_type, feature,biotype, CLIN_SIG, name, sift, polyphen,loftool,cadd_phred  FROM AUX1 INNER JOIN PREDICTORS ON AUX1.var_id=PREDICTORS.fk_var AND AUX1.trans_id=PREDICTORS.fk_trans;')
+    #f_out.write("CREATE EXTENSION pgcrypto;")
+    f_out.write("INSERT INTO USERS ( username, password,study) VALUES ('test2','test2','estudio1');")
             
-
-    return record
-
+         
 
 
 def parse_filter(filt_str):
@@ -1047,10 +1078,20 @@ def drop_tables(f):
     f.write("DROP TABLE IF EXISTS POP_MAFS CASCADE;\n")  
     f.write("DROP TABLE IF EXISTS GT_FIELDS CASCADE;\n") 
     f.write("DROP TABLE IF EXISTS SAMPLE CASCADE;\n")    
-    f.write("DROP TABLE IF EXISTS OTHER_INFO CASCADE;\n")               
-    
+    f.write("DROP TABLE IF EXISTS OTHER_INFO CASCADE;\n")    
+    f.write("DROP TABLE IF EXISTS AUX1 CASCADE;\n")   
+    f.write("DROP TABLE IF EXISTS AUX2 CASCADE;\n")         
+    f.write("DROP TABLE IF EXISTS USERS CASCADE;\n")    
 
 def create_tables(f):
+    f.write("""CREATE TABLE USERS
+                (
+                user_id SERIAL,
+                username varchar(100),
+                password varchar(100),
+                study varchar(255),
+                PRIMARY KEY (user_id)
+                );\n""") 
     f.write("""CREATE TABLE VARIANT
                 (
                 var_id integer NOT NULL,
@@ -1082,13 +1123,15 @@ def create_tables(f):
 				gene varchar(100),
                 feature_type varchar(100),
 				feature varchar(100),
-				biotype varchar(100),				
+				biotype varchar(100),	
+                CLIN_SIG varchar(100),			
                 PRIMARY KEY (trans_id),
                 FOREIGN KEY (fk_var) REFERENCES VARIANT (var_id) ON UPDATE CASCADE ON DELETE CASCADE
                 );\n""")  
     f.write("""CREATE TABLE PREDICTORS
                 (
 				pred_id SERIAL,
+                fk_var integer NOT NULL,
                 fk_trans integer NOT NULL,
 				sift varchar(100),
 				polyphen varchar(100),
@@ -1096,11 +1139,13 @@ def create_tables(f):
 				cadd_phred varchar(100),
 				cadd_raw varchar(100),				
                 PRIMARY KEY (pred_id),
+                FOREIGN KEY (fk_var) REFERENCES VARIANT (var_id) ON UPDATE CASCADE ON DELETE CASCADE,
                 FOREIGN KEY (fk_trans) REFERENCES TRANSCRIPT (trans_id) ON UPDATE CASCADE ON DELETE CASCADE
                 );\n""")  
     f.write("""CREATE TABLE POP_MAFS
                 (
 				mafs_id SERIAL,
+                fk_var integer NOT NULL,
                 fk_trans integer NOT NULL,
                 max_af float(4),
 				af float(4),
@@ -1113,9 +1158,10 @@ def create_tables(f):
 				oth_af float(4),
 				sas_af float(4),
                 PRIMARY KEY (mafs_id),
+                FOREIGN KEY (fk_var) REFERENCES VARIANT (var_id) ON UPDATE CASCADE ON DELETE CASCADE,
                 FOREIGN KEY (fk_trans) REFERENCES TRANSCRIPT (trans_id) ON UPDATE CASCADE ON DELETE CASCADE
                 );\n""") 
-
+    '''
     f.write("""CREATE TABLE OTHER_INFO
                 (
                 other_id SERIAL,
@@ -1143,14 +1189,13 @@ def create_tables(f):
                 gene_pheno varchar(100),
                 domains varchar(100),
                 HGVS_OFFSET varchar(100),
-                CLIN_SIG varchar(100),
                 SOMATIC varchar(100),
                 PHENO varchar(100),
                 PUBMED varchar(100),				
                 PRIMARY KEY (other_id),
                 FOREIGN KEY (fk_trans) REFERENCES TRANSCRIPT (trans_id) ON UPDATE CASCADE ON DELETE CASCADE
                 );\n""") 
-
+    '''
      
     f.write("""CREATE TABLE SAMPLE
                 (
@@ -1161,7 +1206,8 @@ def create_tables(f):
                 ale2 varchar(20),
                 PRIMARY KEY (sample_id),
                 FOREIGN KEY (fk_var) REFERENCES VARIANT (var_id) ON UPDATE CASCADE ON DELETE CASCADE
-                );\n""")                
+                );\n""")    
+
     f.write("""CREATE TABLE GT_FIELDS
                 (
                 gt_fields_id SERIAL,
@@ -1172,6 +1218,46 @@ def create_tables(f):
                 FOREIGN KEY (fk_sample) REFERENCES SAMPLE (sample_id) ON UPDATE CASCADE ON DELETE CASCADE
                 );\n""") 
 
+    f.write("""CREATE TABLE AUX1
+                (
+                var_id integer NOT NULL,
+                trans_id integer NOT NULL,
+                chrom integer NOT NULL,
+                pos integer NOT NULL,
+                consequence varchar(100),
+				impact varchar(100),
+				symbol varchar(100),
+				gene varchar(100),
+                feature_type varchar(100),
+				feature varchar(100),
+				biotype varchar(100),	
+                CLIN_SIG varchar(100),
+                name varchar(255),
+                PRIMARY KEY (var_id,trans_id,name)
+                );\n""")
+
+    f.write("""CREATE TABLE AUX2
+                (
+                var_id integer NOT NULL,
+                trans_id integer NOT NULL,
+                chrom integer NOT NULL,
+                pos integer NOT NULL,
+                consequence varchar(100),
+				impact varchar(100),
+				symbol varchar(100),
+				gene varchar(100),
+                feature_type varchar(100),
+				feature varchar(100),
+				biotype varchar(100),
+                CLIN_SIG varchar(100),	
+                name varchar(255),	
+                sift varchar(100),
+				polyphen varchar(100),
+				loftool varchar(100),
+				cadd_phred varchar(100),
+                PRIMARY KEY (var_id,trans_id)
+                );\n""")  
+               
 def main():
 
     parser = argparse.ArgumentParser()
@@ -1201,13 +1287,4 @@ def main():
 
 
 main()
-
-
-
-
-
-
-
-
-
 
