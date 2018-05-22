@@ -1,11 +1,13 @@
-# -*- coding: utf-8 -*-
+
+ # -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------------
 # AppConfig configuration made easy. Look inside private/appconfig.ini
 # Auth is for authenticaiton and access control
 # -------------------------------------------------------------------------
 from gluon.contrib.appconfig import AppConfig
-from gluon.tools import Auth
+from gluon.tools import Auth, Crud, Service, PluginManager, prettydate
+
 
 # -------------------------------------------------------------------------
 # This scaffolding model makes your app work on Google App Engine too
@@ -43,12 +45,6 @@ else:
     # store sessions and tickets there
     # ---------------------------------------------------------------------
     session.connect(request, response, db=db)
-    # ---------------------------------------------------------------------
-    # or store session in Memcache, Redis, etc.
-    # from gluon.contrib.memdb import MEMDB
-    # from google.appengine.api.memcache import Client
-    # session.connect(request, response, db = MEMDB(Client()))
-    # ---------------------------------------------------------------------
 
 # -------------------------------------------------------------------------
 # by default give a view/generic.extension to all actions from localhost
@@ -64,40 +60,23 @@ if request.is_local and not configuration.get('app.production'):
 response.formstyle = 'bootstrap4_inline'
 response.form_label_separator = ''
 
-# -------------------------------------------------------------------------
-# (optional) optimize handling of static files
-# -------------------------------------------------------------------------
-# response.optimize_css = 'concat,minify,inline'
-# response.optimize_js = 'concat,minify,inline'
 
-# -------------------------------------------------------------------------
-# (optional) static assets folder versioning
-# -------------------------------------------------------------------------
-# response.static_version = '0.0.0'
 
-# -------------------------------------------------------------------------
-# Here is sample code if you need for
-# - email capabilities
-# - authentication (registration, login, logout, ... )
-# - authorization (role based authorization)
-# - services (xml, csv, json, xmlrpc, jsonrpc, amf, rss)
-# - old style crud actions
-# (more options discussed in gluon/tools.py)
-# -------------------------------------------------------------------------
-
-# host names must be a list of allowed host names (glob syntax allowed)
 auth = Auth(db, host_names=configuration.get('host.names'))
 
+auth.define_tables(username=True)
+
+ # all we need is login
+auth.settings.actions_disabled=['register','change_password','request_reset_password','retrieve_username','profile']
+
+# you don't have to remember me
+auth.settings.remember_me_form = False
 
 # -------------------------------------------------------------------------
 # create all tables needed by auth, maybe add a list of extra fields
 # -------------------------------------------------------------------------
-auth.settings.extra_fields['auth_user'] = [
-  Field('address'),
-  Field('city'),
-  Field('zip'),
-  Field('phone')]
-auth.define_tables(username=True,signature=False)
+auth.settings.extra_fields['auth_user'] = []
+
 
 # -------------------------------------------------------------------------
 # configure email
@@ -112,6 +91,9 @@ mail.settings.ssl = configuration.get('smtp.ssl') or False
 # -------------------------------------------------------------------------
 # configure auth policy
 # -------------------------------------------------------------------------
+
+auth.settings.actions_disabled=['register','change_password','request_reset_password']
+
 auth.settings.registration_requires_verification = False
 auth.settings.registration_requires_approval = False
 auth.settings.reset_password_requires_verification = True
@@ -125,7 +107,7 @@ response.meta.keywords = configuration.get('app.keywords')
 response.meta.generator = configuration.get('app.generator')
 
 # -------------------------------------------------------------------------
-# your http://google.com/analytics id                                      
+# your http://google.com/analytics id
 # -------------------------------------------------------------------------
 response.google_analytics_id = configuration.get('google.analytics_id')
 
@@ -157,5 +139,3 @@ if configuration.get('scheduler.enabled'):
 # after defining tables, uncomment below to enable auditing
 # -------------------------------------------------------------------------
 # auth.enable_record_versioning(db)
-
-
