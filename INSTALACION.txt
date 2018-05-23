@@ -28,6 +28,10 @@ python vcf_parser.py -f vcf/NA12878.vcf
 psql -U test2 -d estudio1 -f out.sql -h localhost
 (contraseña: test2)
 
+- INICIAR WEB2PY DESDE LINEA DE COMANDOS
+----------------------------------------
+python web2py.py
+
 Acceder a Web2py con:
 
 - Username = test2
