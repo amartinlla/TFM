@@ -632,8 +632,10 @@ def read_vcf(filename,f_out):
 
                 # Writting TRANSCRIPTS
                 f_out.write('INSERT INTO TRANSCRIPT(fk_var,allele,consequence,impact,symbol,gene,feature_type,feature,biotype,CLIN_SIG) VALUES(')
+                #f_out.write(str(num_linea))
+                #f_out.write(',')
                 f_out.write(str(num_linea))
-                f_out.write(",")
+                f_out.write(',')
                 f_out.write(trans['allele'])
                 f_out.write(',')
                 f_out.write(trans['conseq'])  
@@ -658,11 +660,11 @@ def read_vcf(filename,f_out):
 
                 # Writting PREDICTORS
 
-                f_out.write('INSERT INTO PREDICTORS(fk_var,fk_trans,sift,polyphen,loftool,cadd_phred,cadd_raw) VALUES (')
+                f_out.write('INSERT INTO PREDICTORS(fk_var,sift,polyphen,loftool,cadd_phred,cadd_raw) VALUES (')
                 f_out.write(str(num_linea))
-                f_out.write(",")
-                f_out.write(str(ind+1))
                 f_out.write(',')
+                #f_out.write(str(num_linea))
+                #f_out.write(',')
                 f_out.write(preds['sift'])
                 f_out.write(',')
                 f_out.write(preds['poly'])  
@@ -677,11 +679,11 @@ def read_vcf(filename,f_out):
 
                 # Writting POP_MAFS
 
-                f_out.write('INSERT INTO POP_MAFS(fk_var,fk_trans,max_af,af,afr_af,amr_af,asj_af,eas_af,fin_af,nfe_af,oth_af,sas_af) VALUES(')
+                f_out.write('INSERT INTO POP_MAFS(fk_var,max_af,af,afr_af,amr_af,asj_af,eas_af,fin_af,nfe_af,oth_af,sas_af) VALUES(')
                 f_out.write(str(num_linea))
                 f_out.write(",")
-                f_out.write(str(ind+1))
-                f_out.write(',')
+                #f_out.write(str(num_linea))
+                #f_out.write(',')
      
                 f_out.write(str(max([float(mafs['afr']),float(mafs['amr']),float(mafs['asj']),float(mafs['eas']),float(mafs['fin']),float(mafs['nfe']),float(mafs['oth']),float(mafs['sas'])])))
                 f_out.write(',')
@@ -709,7 +711,7 @@ def read_vcf(filename,f_out):
                 # Writting OTHER_INFO
                 '''
                 f_out.write('INSERT INTO OTHER_INFO(fk_trans,exon,intron,HGVSc,HGVSp,cDNA,CDS,proton,aminoacids,codons,distance,strand,flags,variant_class,symbol_source,HGNC_ID,CCDS,ENSP,swissprot,trembl,uniparc,gene_pheno,domains,HGVS_OFFSET,CLIN_SIG,SOMATIC,PHENO,PUBMED) VALUES(')
-                f_out.write(str(ind+1))
+                f_out.write(str(num_linea))
                 f_out.write(',')
                 f_out.write(other['exon'])                
                 f_out.write(',')     
@@ -805,7 +807,7 @@ def read_vcf(filename,f_out):
     # TABLAS AUXILIARES PARA ALIGERAR AL FRONT
     #f_out.write('INSERT INTO AUX1 SELECT VARIANT.var_id,TRANSCRIPT.trans_id, chrom, pos, VARIANT.id, consequence, impact, symbol, gene, feature_type, feature, biotype, sift, polyphen, loftool, cadd_phred, name, max_af FROM TRANSCRIPT  INNER JOIN PREDICTORS ON TRANSCRIPT.trans_id=PREDICTORS.fk_trans INNER JOIN POP_MAFS ON POP_MAFS.fk_trans=TRANSCRIPT.trans_id INNER JOIN VARIANT ON VARIANT.var_id=TRANSCRIPT.fk_var INNER JOIN EXISTING_VARIATION ON VARIANT.var_id=EXISTING_VARIATION.fk_var;')   
     f_out.write('INSERT INTO AUX1 SELECT DISTINCT VARIANT.var_id,TRANSCRIPT.trans_id, chrom, pos, consequence, impact, symbol, gene, feature_type, feature, BIOTYPE,CLIN_SIG, name FROM TRANSCRIPT INNER JOIN VARIANT ON VARIANT.var_id=TRANSCRIPT.fk_var INNER JOIN EXISTING_VARIATION ON VARIANT.var_id=EXISTING_VARIATION.fk_var;\n')
-    f_out.write('INSERT INTO AUX2 SELECT DISTINCT AUX1.var_id, AUX1.trans_id, chrom, pos, consequence, impact, symbol, gene, feature_type, feature,biotype, CLIN_SIG, name, sift, polyphen,loftool,cadd_phred  FROM AUX1 INNER JOIN PREDICTORS ON AUX1.var_id=PREDICTORS.fk_var AND AUX1.trans_id=PREDICTORS.fk_trans;')
+    f_out.write('INSERT INTO AUX2 SELECT DISTINCT AUX1.var_id, AUX1.trans_id, chrom, pos, consequence, impact, symbol, gene, feature_type, feature,biotype, CLIN_SIG, AUX1.name, sift, polyphen,loftool,cadd_phred,SAMPLE.name, ale1, ale2  FROM AUX1 INNER JOIN PREDICTORS ON AUX1.var_id=PREDICTORS.fk_var AND AUX1.trans_id=PREDICTORS.fk_trans INNER JOIN SAMPLE ON AUX1.var_id=SAMPLE.fk_var;')
     #f_out.write("CREATE EXTENSION pgcrypto;")
     f_out.write("INSERT INTO USERS ( username, password,study) VALUES ('test2','test2','estudio1');")
             
@@ -1124,15 +1126,15 @@ def create_tables(f):
                 feature_type varchar(100),
 				feature varchar(100),
 				biotype varchar(100),	
-                CLIN_SIG varchar(100),			
-                PRIMARY KEY (trans_id),
-                FOREIGN KEY (fk_var) REFERENCES VARIANT (var_id) ON UPDATE CASCADE ON DELETE CASCADE
+                CLIN_SIG varchar(100),			  
+                PRIMARY KEY (trans_id),              
+                FOREIGN KEY (fk_var) REFERENCES VARIANT (var_id) ON UPDATE CASCADE ON DELETE CASCADE                
                 );\n""")  
     f.write("""CREATE TABLE PREDICTORS
                 (
 				pred_id SERIAL,
                 fk_var integer NOT NULL,
-                fk_trans integer NOT NULL,
+                fk_trans SERIAL,
 				sift varchar(100),
 				polyphen varchar(100),
 				loftool varchar(100),
@@ -1146,7 +1148,7 @@ def create_tables(f):
                 (
 				mafs_id SERIAL,
                 fk_var integer NOT NULL,
-                fk_trans integer NOT NULL,
+                fk_trans SERIAL,
                 max_af float(4),
 				af float(4),
 				afr_af float(4),
@@ -1255,7 +1257,10 @@ def create_tables(f):
 				polyphen varchar(100),
 				loftool varchar(100),
 				cadd_phred varchar(100),
-                PRIMARY KEY (var_id,trans_id)
+                sample_name varchar(255) NOT NULL,
+                ale1 varchar(255),
+                ale2 varchar(20),
+                PRIMARY KEY (var_id,trans_id,name)
                 );\n""")  
                
 def main():
@@ -1287,4 +1292,7 @@ def main():
 
 
 main()
+
+
+
 
