@@ -240,12 +240,30 @@ $.fn.dataTable.ext.search.push(
             { data: 'pos' },
             { data: 'consequence' },
             { data: 'impact' },
-            { data: 'clinvar'},
-            { data: 'name' },
+            { data: 'clin_sig'},
+            {
+                data: 'name',
+                "render": function(data, type, full, meta) {
+                    return '<a href="https://www.ensembl.org/Homo_sapiens/Variation/Explore?v=' + data + '" target="_blank">' + data + '</a>';
+                }
+            },
+            //{ data: 'name' },
             { data: 'symbol' },
-            { data: 'gene' },
+            {
+                data: 'gene',
+                "render": function(data, type, full, meta) {
+                    return '<a href="https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=' + data + '" target="_blank">' + data + '</a>';
+                }
+            },
+            //{ data: 'gene' },
             { data: 'feature_type' },
-            { data: 'feature' },
+            {
+                data: 'feature',
+                "render": function(data, type, full, meta) {
+                    return '<a href="https://www.ensembl.org/Homo_sapiens/Transcript/Summary?t=' + data + '" target="_blank">' + data + '</a>';
+                }
+            },
+            //{ data: 'feature' },
             { data: 'biotype' },
             { data: 'sift' },
             { data: 'polyphen' },
