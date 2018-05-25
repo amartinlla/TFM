@@ -130,6 +130,7 @@ table.dataTable thead .sorting_desc_disabled {
                 <th>NFE_AF</th>
                 <th>OTH_AF</th>
                 <th>SAS_AF</th>
+                <th>SAMPLE_NAME</th>
             </tr>
         </thead>
         <tfoot>
@@ -158,6 +159,7 @@ table.dataTable thead .sorting_desc_disabled {
                 <th>NFE_AF</th>
                 <th>OTH_AF</th>
                 <th>SAS_AF</th>
+                <th>SAMPLE_NAME</th>
             </tr>
         </tfoot>
 </table>
@@ -233,6 +235,7 @@ $.fn.dataTable.ext.search.push(
             { data: 'nfe_af' },
             { data: 'oth_af' },
             { data: 'sas_af' },
+            { data: 'alleles'},
         ],
         fixedHeader: {
 						   header: true,
