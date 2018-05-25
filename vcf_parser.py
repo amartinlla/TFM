@@ -27,7 +27,7 @@ except ImportError:
 from model import _Call, _Record, make_calldata_tuple
 from model import _Substitution, _Breakend, _SingleBreakend, _SV
 
-from config import config
+#from config import config
 
 # Metadata parsers/constants
 RESERVED_INFO = {
