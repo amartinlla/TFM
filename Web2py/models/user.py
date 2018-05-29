@@ -8,3 +8,4 @@ Field('password','password'),
 Field('study'),
 migrate=True)
 db.USERS.user_id.requires = IS_NOT_IN_DB(db, db.USERS.user_id)
+
