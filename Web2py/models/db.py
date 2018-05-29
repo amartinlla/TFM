@@ -1,5 +1,4 @@
-
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # -------------------------------------------------------------------------
 # AppConfig configuration made easy. Look inside private/appconfig.ini
