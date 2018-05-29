@@ -316,24 +316,28 @@ $.fn.dataTable.ext.search.push(
                 text: 'Export',
                 buttons: [
                     {
-                        extend: 'copy',
-                        text: 'copy to clipboard',
+                        extend: 'copyHtml5',
+                        text: 'Copy',
                         className: 'blue'
                     },
                     {
-                        extend: 'excel',
+                        extend: 'excelHtml5',
+                        text: 'Excel',
                         className: 'green'
                     },
                     {
                         extend: 'csvHtml5',
+                        text: 'CSV',
                         className: 'orange'
                     },
                     {
-                        extend: 'pdf',
+                        extend: 'pdfHtml5',
+                        text: 'PDF',
                         className: 'red'
                     },
                     {
                         extend: 'print',
+                        text: 'Print',
                         className: 'BlueViolet'
                     }
                 ]
