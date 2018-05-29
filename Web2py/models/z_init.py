@@ -16,7 +16,6 @@ if not db().select(db.auth_user.ALL).first():
         study = study
     )
 
-
 def hello():
     return dict(message='Hello %(first_name)s' % auth.user)
 
