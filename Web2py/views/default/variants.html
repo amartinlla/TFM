@@ -1,39 +1,91 @@
 {{extend 'layout.html'}}
 {{pass}}
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="../../extensions/Editor/css/editor.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.2.5/css/select.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.5.1/css/buttons.dataTables.min.css">
+
 <script src="https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.flash.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/vfs_fonts.js"></script>
 <script src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.html5.min.js"></script>
+
+<script src="../../extensions/Editor/js/dataTables.editor.min.js"></script>
+<script src="https://cdn.datatables.net/select/1.2.5/js/dataTables.select.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.print.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script src="https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js"></script>
+<script src="https://npmcdn.com/bootstrap@4.0.0-alpha.5/dist/js/bootstrap.min.js"></script>
 
 
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedcolumns/3.2.4/css/fixedColumns.dataTables.min.css">
 
-   <h3>Variant Information</h3>
+
+<style>
+
+    .dt-button.red {
+    color: red;
+    }
+.dt-button.green {
+    color: green;
+    }
+.dt-button.orange {
+    color: orange;
+    }
+.dt-button.blue {
+    color: blue;
+    }  
+.dt-button.BlueViolet {
+    color: BlueViolet;
+    } 
+    
+    th.table-cell-edit{
+    background-color: #99ccff;
+}
+    a.buttons-collection {
+        margin-left: 1em;
+    }
+
+</style>
+
+<h1>VCFWeb</h1>
+
+<h2> Variant Basic Information</h2>
+<br><br>
+
+<h5>
+    This page only shows the most relevant information about variants, for more interesting filters and options with the columns to priorize variants, please click on <b>Go Filtering!</b> button.
+</h5>
+
+<br></br>
+
+<div class="topnav">
+  <button type="button" class="btn btn-primary" onclick="location.href='{{=URL('index')}}'">Go HOME</button>
+  <button type="button" class="btn btn-primary" onclick="location.href='{{=URL('filters')}}'">Go Filtering!</button>
+</div>
+
+<br></br>
+
    <table id="trans-table" class="table table-bordered table-striped" cellspacing="0" width="100%">
         <thead>
             <tr>
-                <th>Consequence</th>
-                <th>Impact</th>
-                <th>Symbol</th>
-                <th>Feature type</th>
-                <th>Biotype</th>
-                <th>Existing_variation</th>
-                <th>SIFT</th>
-                <th>PolyPhen</th>
-                <th>Loftool</th>
-                <th>Cadd_phred</th>
-                <th>MAX_FREQ</th>
+                <th class=table-cell-edit>Consequence</th>
+                <th class=table-cell-edit>Impact</th>
+                <th class=table-cell-edit>Symbol</th>
+                <th class=table-cell-edit>Feature type</th>
+                <th class=table-cell-edit>Biotype</th>
+                <th class=table-cell-edit>Existing_variation</th>
+                <th class=table-cell-edit>SIFT</th>
+                <th class=table-cell-edit>PolyPhen</th>
+                <th class=table-cell-edit>Loftool</th>
+                <th class=table-cell-edit>Cadd_phred</th>
+                <th class=table-cell-edit>MAX_FREQ</th>
             </tr>
         </thead>
        <tfoot>
@@ -52,6 +104,9 @@
             </tr>
         </tfoot>
     </table>
+<br></br>
+<br></br>
+<br></br>
 
 <script type="text/javascript">
 
@@ -71,9 +126,46 @@ $(document).ready(function(){
             { data: 'loftool' },
             { data: 'cadd_phred' },
             { data: 'max_af' }
+            // 'id' omitted to show that you can
+            // use only the fields you choose
+        ],
+        "pagingType": "full_numbers",
+        dom: 'Bfrtip',
+        select: true,
+        buttons: [
+            {
+                extend: 'collection',
+                text: 'Export',
+                buttons: [
+                    {
+                        extend: 'copy',
+                        text: 'Copy',
+                        className: 'blue'
+                    },
+                    {
+                        extend: 'excel',
+                        text: 'Excel',
+                        className: 'green'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        text: 'CSV',
+                        className: 'orange'
+                    },
+                    {
+                        extend: 'pdf',
+                        text: 'PDF',
+                        className: 'red'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        className: 'BlueViolet'
+                    }
+                ]
+            }
         ]
     });
-
      // Setup - add a text input to each footer cell
     $('#trans-table tfoot th').each( function (i) {
         var title = $('#trans-table thead th').eq( $(this).index() ).text();
@@ -89,14 +181,6 @@ $(document).ready(function(){
             .draw();
     } );
 
-    $('input.column_filter').on( 'keyup click', function () {
-        filterColumn( $(this).parents('tr').attr('data-column') );
-    } );
-
 });
 
 </script>
-
-<form>
-      <input type="button" value="volver atrás" name="volver atrás2" onclick="history.back()" />
-</form>
