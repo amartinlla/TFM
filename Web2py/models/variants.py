@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import psycopg2
 
 
@@ -148,13 +149,12 @@ Field('gene'),
 Field('feature_type'),
 Field('feature'),
 Field('biotype'),
-Field('CLIN_SIG'),
+Field('clin_sig'),
 Field('name'),
 Field('sift'),
 Field('polyphen'),
 Field('loftool'),
 Field('cadd_phred'),
-Field('alleles'),
 migrate=True)
 db.AUX2.var_id.requires = IS_NOT_IN_DB(db, db.AUX2.var_id)
 db.AUX2.trans_id.requires = IS_NOT_IN_DB(db, db.AUX2.trans_id)
