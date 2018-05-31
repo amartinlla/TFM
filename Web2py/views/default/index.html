@@ -1,44 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-div.scrollmenu {
-    background-color: #333;
-    overflow: auto;
-    white-space: nowrap;
-}
-.scrollmenu a:hover {
-    background-color: #ccc;
-}
-
-div.scrollmenu a {
-    display: inline-block;
-    color: white;
-    text-align: center;
-    padding: 12px;
-    text-decoration: none;
-}
-
-}
-</style>
-</head>
-<body>
+{{left_sidebar_enabled=True,right_sidebar_enabled=False,('message' in globals())}}
 {{extend 'layout.html'}}
-<div class="scrollmenu">
-    <a href="#home">HOME</a>
-    <a href="{{=URL('default','user')}}">LOGIN</a>
-    <a href="{{=URL('default','user','register')}}">REGISTER</a>
-    <a href="{{=URL('variants')}}">VARIANTS</a>
+
+{{block left_sidebar}}
+<h2>Welcome to VCFWeb!</h3>
+<br><br>
+<div class="left-info">
+  <p>
+    <b>A web-based tool for visualizing, filtering and priorizing variants.</b>
+  </p>
+  <p>
+   When a user logs in, VCFWeb automatically loads her/his data in a table which can be filtered as desired to priorize a small amount of variants.
+  </p>
+   <br><br>
+  <p>
+    Please, login to access your data (above menu)
+  </p>
+  </div>
+
 </div>
-<h1>VCFWeb</h1>
-{{if 'message' in globals():}}
-<h3>{{=message}}</h3>
-{{pass}}
-<p>VCFWeb: a web-based tool for visualizing, filtering and priorizing variants.</p>
-<br></br>
-
-
-</body>
-</html>
-
+{{end}}
