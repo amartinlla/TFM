@@ -27,7 +27,7 @@ except ImportError:
 from model import _Call, _Record, make_calldata_tuple
 from model import _Substitution, _Breakend, _SingleBreakend, _SV
 
-#from config import config
+from config import config
 
 # Metadata parsers/constants
 RESERVED_INFO = {
@@ -807,7 +807,7 @@ def read_vcf(filename,f_out):
     # TABLAS AUXILIARES PARA ALIGERAR AL FRONT
     #f_out.write('INSERT INTO AUX1 SELECT VARIANT.var_id,TRANSCRIPT.trans_id, chrom, pos, VARIANT.id, consequence, impact, symbol, gene, feature_type, feature, biotype, sift, polyphen, loftool, cadd_phred, name, max_af FROM TRANSCRIPT  INNER JOIN PREDICTORS ON TRANSCRIPT.trans_id=PREDICTORS.fk_trans INNER JOIN POP_MAFS ON POP_MAFS.fk_trans=TRANSCRIPT.trans_id INNER JOIN VARIANT ON VARIANT.var_id=TRANSCRIPT.fk_var INNER JOIN EXISTING_VARIATION ON VARIANT.var_id=EXISTING_VARIATION.fk_var;')   
     f_out.write('INSERT INTO AUX1 SELECT DISTINCT VARIANT.var_id,TRANSCRIPT.trans_id, chrom, pos, consequence, impact, symbol, gene, feature_type, feature, BIOTYPE,CLIN_SIG, name FROM TRANSCRIPT INNER JOIN VARIANT ON VARIANT.var_id=TRANSCRIPT.fk_var INNER JOIN EXISTING_VARIATION ON VARIANT.var_id=EXISTING_VARIATION.fk_var;\n')
-    f_out.write('INSERT INTO AUX2 SELECT DISTINCT AUX1.var_id, AUX1.trans_id, chrom, pos, consequence, impact, symbol, gene, feature_type, feature,biotype, CLIN_SIG, AUX1.name, sift, polyphen,loftool,cadd_phred,ale1||ale2 as alleles  FROM AUX1 INNER JOIN PREDICTORS ON AUX1.var_id=PREDICTORS.fk_var AND AUX1.trans_id=PREDICTORS.fk_trans INNER JOIN SAMPLE ON AUX1.var_id=SAMPLE.fk_var;')
+    f_out.write('INSERT INTO AUX2 SELECT DISTINCT AUX1.var_id, AUX1.trans_id, chrom, pos, consequence, impact, symbol, gene, feature_type, feature,biotype, CLIN_SIG, AUX1.name, sift, polyphen,loftool,cadd_phred,SAMPLE.name, ale1||ale2 as alleles FROM AUX1 INNER JOIN PREDICTORS ON AUX1.var_id=PREDICTORS.fk_var AND AUX1.trans_id=PREDICTORS.fk_trans INNER JOIN SAMPLE ON AUX1.var_id=SAMPLE.fk_var;')
     #f_out.write("CREATE EXTENSION pgcrypto;")
     f_out.write("INSERT INTO USERS ( username, password,study) VALUES ('test2','test2','estudio1');")
             
@@ -1245,19 +1245,20 @@ def create_tables(f):
                 chrom integer NOT NULL,
                 pos integer NOT NULL,
                 consequence varchar(100),
-		impact varchar(100),
-		symbol varchar(100),
-		gene varchar(100),
+				impact varchar(100),
+				symbol varchar(100),
+				gene varchar(100),
                 feature_type varchar(100),
-		feature varchar(100),
-		biotype varchar(100),
+				feature varchar(100),
+				biotype varchar(100),
                 CLIN_SIG varchar(100),	
                 name varchar(255),	
                 sift varchar(100),
-		polyphen varchar(100),
-		loftool varchar(100),
-		cadd_phred varchar(100),
-                alelles varchar(255),
+				polyphen varchar(100),
+				loftool varchar(100),
+				cadd_phred varchar(100),
+                sample_name varchar(255) NOT NULL,
+                alleles varchar(255),
                 PRIMARY KEY (var_id,trans_id,name)
                 );\n""")  
                
@@ -1290,7 +1291,4 @@ def main():
 
 
 main()
-
-
-
 
