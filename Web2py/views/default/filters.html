@@ -177,9 +177,9 @@ table.dataTable thead .sorting_desc_disabled {
 
 <br></br>
 
-<h2>
+<h3>
     Filter by position initial and final
-</h2>
+</h3>
 <br>
 <table cellspacing="5" cellpadding="5" border="0">
     <tbody>
@@ -192,8 +192,23 @@ table.dataTable thead .sorting_desc_disabled {
     </tbody>
 </table>
 
+<h3>
+    Select MAX_FREQ Threshold
+</h3>
+<br>
+<table cellspacing="5" cellpadding="5" border="0">
+    <tbody>
+        <tr>
+            <td>Maximum Threshold:</td>
+            <td><input id="thres" name="thres" type="text"></td>
+        </tr>
+    </tbody>
+</table>
+
+
 <script>
   /* Custom filtering function which will search data in column four between two values */
+//Filter for POS
 $.fn.dataTable.ext.search.push(
     function( settings, data, dataIndex ) {
         var min = parseInt( $('#min').val(), 10 );
@@ -204,6 +219,20 @@ $.fn.dataTable.ext.search.push(
              ( isNaN( min ) && pos <= max ) ||
              ( min <= pos   && isNaN( max ) ) ||
              ( min <= pos   && pos <= max ) )
+        {
+            return true;
+        }
+        return false;
+    }
+);
+//Filter for MAX_FREQ
+$.fn.dataTable.ext.search.push(
+    function( settings, data, dataIndex ) {
+        var thres = parseFloat( $('#thres').val(), 10 );
+        var value = parseFloat( data[5] ) || 0; // use data for the pos column
+ 
+        if ( ( isNaN( thres ) ) ||
+             ( value <= thres ) )
         {
             return true;
         }
@@ -379,9 +408,12 @@ $.fn.dataTable.ext.search.push(
        $('#min, #max').keyup( function() {
         table.draw();
         } );
+        $('#thres').keyup( function() {
+        table.draw();
+        } );
          // Setup - add a text input to each footer cell
     $('#all-table tfoot th').each( function (i) {
-        if (i==5 || i==6  || i==7 || i==9 || i==11 || i==12 || i==13 || i==14 || i==15 || i==16 || i==17 || i==18 || i==19 || i==20 || i==21 || i==22 || i==23 || i==24 || i==25){
+        if (i==6  || i==7 || i==9 || i==11 || i==12 || i==13 || i==14 || i==15 || i==16 || i==17 || i==18 || i==19 || i==20 || i==21 || i==22 || i==23 || i==24 || i==25){
             var title = $('#all-table thead th').eq( $(this).index() ).text();
             $(this).html( '<input type="text" placeholder="Search '+title+'" data-index="'+i+'" />' );
         }
