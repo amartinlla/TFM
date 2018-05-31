@@ -1,4 +1,3 @@
-
 {{extend 'layout.html'}}
 {{pass}}
 
@@ -351,7 +350,7 @@ $.fn.dataTable.ext.search.push(
 	  	scrollCollapse: true,
        	select:true,
 	    initComplete: function() {
-		  this.api().columns([0,2,3,4,8,10,12,15]).every(function() {
+		  this.api().columns([0,2,3,4,8,10,15]).every(function() {
 			var column = this;
 			var ddmenu = cbDropdown($(column.footer()).empty() )
 			  .on('change', ':checkbox', function() {
@@ -405,7 +404,7 @@ $.fn.dataTable.ext.search.push(
         } );
          // Setup - add a text input to each footer cell
     $('#all-table tfoot th').each( function (i) {
-        if (i==5 || i==6  || i==7 || i==9 || i==11 || i==13 || i==14 || i==15 || i==16 || i==17 || i==18 || i==19 || i==20 || i==21 || i==22 || i==23 || i==24 || i==25){
+        if (i==5 || i==6  || i==7 || i==9 || i==11 || i==12 || i==13 || i==14 || i==15 || i==16 || i==17 || i==18 || i==19 || i==20 || i==21 || i==22 || i==23 || i==24 || i==25){
             var title = $('#all-table thead th').eq( $(this).index() ).text();
 
             $(this).html( '<input type="text" placeholder="Search '+title+'" data-index="'+i+'" />' );
