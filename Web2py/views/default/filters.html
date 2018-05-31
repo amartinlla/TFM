@@ -27,34 +27,27 @@
 th.table-cell-edit{
     background-color: #99ccff;
 }
-
 .dt-buttons{
 float:right;
  margin-left:5px;
  margin-bottom:7px;
  }
-
 .dataTables_wrapper{
 margin-top:
-
 </style>
-
 <style>
 /* Styles for the drop-down. Feel free to change the styles to suit your website. :-) */
-
 .cb-dropdown-wrap {
   max-height: 80px; /* At most, around 3/4 visible items. */
   position: relative;
   height: 19px;
 }
-
 .cb-dropdown,
 .cb-dropdown li {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-
 .cb-dropdown {
   position: absolute;
   z-index: 1;
@@ -64,37 +57,31 @@ margin-top:
   background: #fff;
   border: 1px solid #888;
 }
-
 /* For selected filter. */
 .active .cb-dropdown {
   background: #fff;
 }
-
 .cb-dropdown-wrap:hover .cb-dropdown {
   height: 80px;
   overflow: auto;
   transition: 0.2s height ease-in-out;
 }
-
 /* For selected items. */
 .cb-dropdown li.active {
   background: #cce0ff;
 }
-
 .cb-dropdown li label {
   display: block;
   position: relative;
   cursor: pointer;
   line-height: 19px; /* Match height of .cb-dropdown-wrap */
 }
-
 .cb-dropdown li label > input {
   position: absolute;
   right: 0;
   top: 0;
   width: 16px;
 }
-
 .cb-dropdown li label > span {
   display: block;
   margin-left: 3px;
@@ -104,7 +91,6 @@ margin-top:
   font-weight: normal;
   text-align: left;
 }
-
 /* This fixes the vertical aligning of the sorting icon. */
 table.dataTable thead .sorting,
 table.dataTable thead .sorting_asc,
@@ -134,6 +120,7 @@ table.dataTable thead .sorting_desc_disabled {
                 <th class=table-cell-edit>CONSEQUENCE</th>
                 <th class=table-cell-edit>IMPACT</th>
                 <th class=table-cell-edit>CLINVAR</th>
+                <th class=table-cell-edit>MAX_FREQ</th>
                 <th class=table-cell-edit>EXISTING_VAR</th>
                 <th class=table-cell-edit>SYMBOL</th>
                 <th class=table-cell-edit>GENE</th>
@@ -143,8 +130,7 @@ table.dataTable thead .sorting_desc_disabled {
                 <th class=table-cell-edit>SIFT</th>
                 <th class=table-cell-edit>POLYPHEN</th>
                 <th class=table-cell-edit>LOFTOOL</th>
-                <th class=table-cell-edit>CADD_PHRED</th>
-                <th class=table-cell-edit>MAX_FREQ</th>
+                <th class=table-cell-edit>CADD_PHRED</th>                
                 <th class=table-cell-edit>AF</th>
                 <th class=table-cell-edit>AFR_AF</th>
                 <th class=table-cell-edit>AMR_AF</th>
@@ -164,6 +150,7 @@ table.dataTable thead .sorting_desc_disabled {
                 <th>CONSEQUENCE</th>
                 <th>IMPACT</th>
                 <th>CLINVAR</th>
+                <th>MAX_FREQ</th>
                 <th>EXISTING_VAR</th>
                 <th>SYMBOL</th>
                 <th>GENE</th>
@@ -173,8 +160,7 @@ table.dataTable thead .sorting_desc_disabled {
                 <th>SIFT</th>
                 <th>POLYPHEN</th>
                 <th>LOFTOOL</th>
-                <th>CADD_PHRED</th>
-                <th>MAX_FREQ</th>
+                <th>CADD_PHRED</th>                
                 <th>AF</th>
                 <th>AFR_AF</th>
                 <th>AMR_AF</th>
@@ -224,7 +210,6 @@ $.fn.dataTable.ext.search.push(
         return false;
     }
 );
-
   $(document).ready(function() {
     function cbDropdown(column) {
 		return $('<ul>', {
@@ -241,6 +226,7 @@ $.fn.dataTable.ext.search.push(
             { data: 'consequence' },
             { data: 'impact' },
             { data: 'clin_sig'},
+            { data: 'max_af' },                                         
             {
                 data: 'name',
                 "render": function(data, type, full, meta) {
@@ -269,7 +255,6 @@ $.fn.dataTable.ext.search.push(
             { data: 'polyphen' },
             { data: 'loftool' },
             { data: 'cadd_phred' },
-            { data: 'max_af' },
             { data: 'af' },
             { data: 'afr_af' },
             { data: 'amr_af' },
@@ -294,13 +279,11 @@ $.fn.dataTable.ext.search.push(
 				 [10,25,50,-1],
 				 ['10 rows', '25 rows', '50 rows', 'Show all']
 		],
-
 		buttons: [
            {
             extend:'pageLength',
             text: '<i class="fa fa-list-ol" aria-hidden="true" style="color:darkblue">Page Length</i>',
             titleAttr: 'show no.of rows'
-
             },
     		{
 				extend: 'colvis',
@@ -359,18 +342,15 @@ $.fn.dataTable.ext.search.push(
 				  active = true;
 				  return $.fn.dataTable.util.escapeRegex($(element).val());
 				}).toArray().join('|');
-
 				column
 				  .search(vals.length > 0 ? '^(' + vals + ')$' : '', true, false)
 				  .draw();
-
 				// Highlight the current item if selected.
 				if (this.checked) {
 				  $(this).closest('li').addClass('active');
 				} else {
 				  $(this).closest('li').removeClass('active');
 				}
-
 				// Highlight the current filter if selected.
 				var active2 = ddmenu.parent().is('.active');
 				if (active && !active2) {
@@ -379,7 +359,6 @@ $.fn.dataTable.ext.search.push(
 				  ddmenu.parent().removeClass('active');
 				}
 			  });
-
 			column.data().unique().sort().each(function(d, j) {
 			  var // wrapped
 				$label = $('<label>'),
@@ -390,10 +369,8 @@ $.fn.dataTable.ext.search.push(
 				  type: 'checkbox',
 				  value: d
 				});
-
 			  $text.appendTo($label);
 			  $cb.appendTo($label);
-
 			  ddmenu.append($('<li>').append($label));
 			});
 		  });
@@ -406,11 +383,9 @@ $.fn.dataTable.ext.search.push(
     $('#all-table tfoot th').each( function (i) {
         if (i==5 || i==6  || i==7 || i==9 || i==11 || i==12 || i==13 || i==14 || i==15 || i==16 || i==17 || i==18 || i==19 || i==20 || i==21 || i==22 || i==23 || i==24 || i==25){
             var title = $('#all-table thead th').eq( $(this).index() ).text();
-
             $(this).html( '<input type="text" placeholder="Search '+title+'" data-index="'+i+'" />' );
         }
     } );
-
     // Filter event handler
     $( table.table().container() ).on( 'keyup', 'tfoot input', function () {
         table
@@ -419,5 +394,4 @@ $.fn.dataTable.ext.search.push(
             .draw();
     } );
 } );
-
 </script>
