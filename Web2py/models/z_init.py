@@ -2,8 +2,8 @@
 # Description:
 # Automatically adds a user to the database called "studio1"
 
-user = 'test2'
-pwd = 'test2'
+user = 'user1'
+pwd = 'VCFW3b'
 study = 'estudio1'
 
 
