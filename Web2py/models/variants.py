@@ -3,7 +3,7 @@
 import psycopg2
 
 
-db =  DAL('postgres://test2:test2@localhost/estudio1',pool_size=0,lazy_tables=True) # The database is now connected and the connection is stored in the global variable db.
+db =  DAL('postgres://user1:VCFW3b@localhost/estudio1',pool_size=0,lazy_tables=True) # The database is now connected and the connection is stored in the global variable db.
 
 print db._uri # Uniform Resource Identifier
 print db._dbname
