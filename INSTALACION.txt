@@ -1,12 +1,3 @@
-CLINVAR
-https://www.ensembl.org/Homo_sapiens/Variation/Explore?v=rs10749727
-
-GENE
-https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=ENSG00000177414
-
-TRANSCRIPT
-https://www.ensembl.org/Homo_sapiens/Transcript/Summary?t=ENST00000371076
-
 
 - INSTALAR WEB2PY (DESCOMPRIMIR EL CÓDIGO FUENTE Y EJECUTAR)
 -----------------------------------------------------------------------
