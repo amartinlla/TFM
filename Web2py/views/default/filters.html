@@ -178,34 +178,36 @@ table.dataTable thead .sorting_desc_disabled {
 
 <br></br>
 
-<h3>
-    Filter by position initial and final
-</h3>
-<br>
-<table cellspacing="5" cellpadding="5" border="0">
-    <tbody>
-        <tr>
-            <td>Initial Pos:</td>
-            <td><input id="min" name="min" type="text"></td>
-            <td>Final Pos:</td>
-            <td><input id="max" name="max" type="text"></td>
-        </tr>
-    </tbody>
+<table>
+    <tr>
+    <th>Filter by position initial and final</th>
+    <th>Select MAX_FREQ Threshold</th>
+  </tr>
+  <tr>
+    <td>
+        <table cellspacing="5" cellpadding="5" border="0">
+            <tbody>
+                <tr>
+                    <td>Initial Pos:</td>
+                    <td><input id="min" name="min" type="text"></td>
+                    <td>Final Pos:</td>
+                    <td><input id="max" name="max" type="text"></td>
+                </tr>
+            </tbody>
+        </table>
+    </td>
+    <td>
+        <table cellspacing="5" cellpadding="5" border="0">
+            <tbody>
+                <tr>
+                    <td>Maximum Threshold:</td>
+                    <td><input id="thres" name="thres" type="text"></td>
+                </tr>
+            </tbody>
+        </table>
+      </td>
+  </tr>
 </table>
-
-<h3>
-    Select MAX_FREQ Threshold
-</h3>
-<br>
-<table cellspacing="5" cellpadding="5" border="0">
-    <tbody>
-        <tr>
-            <td>Maximum Threshold:</td>
-            <td><input id="thres" name="thres" type="text"></td>
-        </tr>
-    </tbody>
-</table>
-
 
 <script>
   /* Custom filtering function which will search data in column four between two values */
